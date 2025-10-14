@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XIRR Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input[type="number"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            border: 2px solid #007bff;
+            background-color: #e9f7ff;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .note {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📈 XIRR Investment Calculator</h1>
+    
+    <div class="input-group">
+        <label for="monthlyPayment">Monthly Payment Amount (e.g., 5000):</label>
+        <input type="number" id="monthlyPayment" value="5000" min="1" step="1" required>
+    </div>
+    
+    <div class="input-group">
+        <label for="numPayments">Number of Payments Made (e.g., 60 for 5 years):</label>
+        <input type="number" id="numPayments" value="60" min="1" step="1" required>
+    </div>
+    
+    <div class="input-group">
+        <label for="finalValue">Final Maturity Value Received (e.g., 3,90,000):</label>
+        <input type="number" id="finalValue" value="390000" min="0" step="1" required>
+    </div>
+    
+    <button onclick="calculateXIRR()">Calculate XIRR</button>
+    
+    <div id="result">
+        Input values and click 'Calculate XIRR'
+    </div>
+    
+    <p class="note">
+        This calculation assumes cash flows are exactly one month apart, starting today.
+    </p>
+</div>
+
+<script>
+    // --- XIRR Calculation Logic (Adapted for JavaScript) ---
+    
+    /**
+     * Finds the XIRR for a series of cash flows and dates.
+     * This implementation uses the Newton-Raphson method for finding the root.
+     * @param {number[]} values - The cash flows (negative for outflow, positive for inflow).
+     * @param {Date[]} dates - The dates corresponding to the cash flows.
+     * @param {number} guess - The initial guess for the rate (e.g., 0.1).
+     * @returns {number} The XIRR value (as a decimal, e.g., 0.125 for 12.5%).
+     */
+    function xirr(values, dates, guess = 0.1) {
+        if (values.length !== dates.length || values.length < 2) {
+            return NaN; // Need at least two cash flows
+        }
+
+        // Convert dates to a number of days relative to the first date
+        const firstDate = dates[0].getTime();
+        const days = dates.map(date => (date.getTime() - firstDate) / (1000 * 60 * 60 * 24));
+        
+        const MAX_ITERATIONS = 100;
+        const PRECISION = 0.0000001;
+        let rate = guess;
+
+        // XNPV and Derivative of XNPV functions (essential for Newton's method)
+        const xnpv = (rate) => {
+            let result = 0;
+            for (let i = 0; i < values.length; i++) {
+                result += values[i] / Math.pow(1 + rate, days[i] / 365);
+            }
+            return result;
+        };
+
+        const xnpv_derivative = (rate) => {
+            let result = 0;
+            for (let i = 0; i < values.length; i++) {
+                const term = days[i] / 365;
+                result -= values[i] * term * Math.pow(1 + rate, -term - 1);
+            }
+            return result;
+        };
+
+        // Newton-Raphson Iteration
+        for (let i = 0; i < MAX_ITERATIONS; i++) {
+            const f = xnpv(rate);
+            const fPrime = xnpv_derivative(rate);
+            
+            if (Math.abs(fPrime) < 1e-10) {
+                // Derivative is too close to zero, convergence failure
+                return NaN; 
+            }
+            
+            const nextRate = rate - f / fPrime;
+            
+            if (Math.abs(nextRate - rate) < PRECISION) {
+                return nextRate; // Success
+            }
+            
+            rate = nextRate;
+        }
+
+        return NaN; // Failed to converge after max iterations
+    }
+
+    /**
+     * Main function to get user inputs and display the XIRR result.
+     */
+    function calculateXIRR() {
+        const paymentAmount = parseFloat(document.getElementById('monthlyPayment').value);
+        const numPayments = parseInt(document.getElementById('numPayments').value);
+        const finalValue = parseFloat(document.getElementById('finalValue').value);
+        const resultDiv = document.getElementById('result');
+
+        // Basic input validation
+        if (isNaN(paymentAmount) || isNaN(numPayments) || isNaN(finalValue) || 
+            paymentAmount <= 0 || numPayments <= 0) {
+            resultDiv.innerHTML = "❌ Please enter valid positive numbers for all fields.";
+            return;
+        }
+
+        // --- Prepare Cash Flows and Dates ---
+        
+        const values = [];
+        const dates = [];
+        const today = new Date();
+        
+        // 1. Initial Outflow (T=0, optional, assuming first payment is TODAY)
+        // This calculator assumes the first payment happens *today* (T=0)
+        
+        // 2. Monthly Payments (Outflows, negative values)
+        // Loop for all 'numPayments'.
+        for (let i = 0; i < numPayments; i++) {
+            values.push(-paymentAmount); // Outflow
+            const date = new Date(today);
+            // Move forward 'i' months for the payment date
+            date.setMonth(today.getMonth() + i);
+            dates.push(date);
+        }
+
+        // 3. Final Maturity Value (Inflow, positive value)
+        // The final value is received one month *after* the last monthly payment.
+        const maturityDate = new Date(today);
+        maturityDate.setMonth(today.getMonth() + numPayments);
+        
+        values.push(finalValue); // Inflow
+        dates.push(maturityDate);
+
+        // --- Calculate and Display ---
+
+        const xirrValue = xirr(values, dates, 0.1); // Initial guess of 10% (0.1)
+
+        if (isNaN(xirrValue)) {
+            resultDiv.innerHTML = "⚠️ Calculation Failed. The inputs might not yield a sensible XIRR.";
+        } else {
+            const xirrPercent = (xirrValue * 100).toFixed(2);
+            resultDiv.innerHTML = `✅ **XIRR (Annualized Return):** <span style="color: #d9534f;">${xirrPercent}%</span>`;
+        }
+    }
+</script>
+
+</body>
+</html>
