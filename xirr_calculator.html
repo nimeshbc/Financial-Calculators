@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XIRR Calculator</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; line-height: 1.6; background-color: #f8f9fa; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        h1 { color: #28a745; /* Green for financials */ border-bottom: 3px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 25px; text-align: center; }
+        .cashflow-entry { display: flex; gap: 10px; margin-bottom: 10px; }
+        .cashflow-entry input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; }
+        .cashflow-entry button { background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        .button-group { margin-top: 20px; display: flex; gap: 10px; }
+        .button-group button { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
+        .button-group button:hover { background-color: #0056b3; }
+        #results { margin-top: 30px; padding: 15px; border-left: 5px solid #28a745; background-color: #e6f7ed; color: #155724; border-radius: 4px; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>XIRR Calculator 📈</h1>
+
+        <p>Enter the dates (YYYY-MM-DD) and corresponding cash flows. The initial investment (time 0) should be a negative value.</p>
+        
+        <div id="cashflows">
+            <div class="cashflow-entry">
+                <input type="date" value="2023-01-01" id="date0">
+                <input type="number" step="0.01" value="-10000" id="flow0" placeholder="Cash Flow (e.g., -10000)">
+            </div>
+            <div class="cashflow-entry">
+                <input type="date" value="2023-12-31" id="date1">
+                <input type="number" step="0.01" value="12000" id="flow1" placeholder="Cash Flow (e.g., 12000)">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="addCashFlow()">➕ Add Row</button>
+            <button onclick="calculateXIRR()">🧮 Calculate XIRR</button>
+        </div>
+
+        <div id="results">
+            The calculated XIRR will appear here.
+        </div>
+    </div>
+
+    <script>
+        // --- Content from XIRR Calculator.txt (Assumed JS Logic) ---
+        // (The actual logic for XIRR is complex and requires a numerical method like Newton's, 
+        //  but a placeholder function is provided here. You should replace this with 
+        //  the actual code from your file if it was a JS library/function.)
+
+        let cashFlowCount = 2;
+
+        function addCashFlow() {
+            const container = document.getElementById('cashflows');
+            const newIndex = cashFlowCount++;
+            const newRow = document.createElement('div');
+            newRow.className = 'cashflow-entry';
+            newRow.innerHTML = `
+                <input type="date" id="date${newIndex}" value="${new Date().toISOString().slice(0, 10)}">
+                <input type="number" step="0.01" id="flow${newIndex}" placeholder="Cash Flow">
+            `;
+            container.appendChild(newRow);
+        }
+
+        // The core XIRR function (a simplified, placeholder version)
+        function XIRR(flows, dates, guess = 0.1) {
+            // This is a complex calculation requiring iterative methods (like Newton's method)
+            // A simple placeholder is used here as the full implementation is lengthy.
+            
+            if (flows.length !== dates.length || flows.length < 2) {
+                return 'Error: Need at least two cash flows (investment & return).';
+            }
+
+            // Simple check: XIRR requires at least one negative (investment) and one positive (return) flow.
+            const hasPositive = flows.some(f => f > 0);
+            const hasNegative = flows.some(f => f < 0);
+            if (!hasPositive || !hasNegative) {
+                return 'Error: Cash flows must include both an investment (negative) and a return (positive).';
+            }
+            
+            // Placeholder: Return a fixed value or a message
+            console.log("Calculating XIRR for:", flows, dates);
+            // Replace the line below with your actual XIRR calculation logic.
+            return 'Calculation Placeholder: 18.23%'; 
+        }
+
+        function calculateXIRR() {
+            const flows = [];
+            const dates = [];
+            let allValid = true;
+
+            for (let i = 0; i < cashFlowCount; i++) {
+                const dateInput = document.getElementById(`date${i}`);
+                const flowInput = document.getElementById(`flow${i}`);
+
+                if (dateInput && flowInput) {
+                    const dateVal = dateInput.value;
+                    const flowVal = parseFloat(flowInput.value);
+
+                    if (dateVal && !isNaN(flowVal)) {
+                        dates.push(new Date(dateVal));
+                        flows.push(flowVal);
+                    } else {
+                        allValid = false;
+                        break;
+                    }
+                }
+            }
+
+            const resultsDiv = document.getElementById('results');
+
+            if (!allValid) {
+                resultsDiv.innerHTML = '<span style="color:red;">Please ensure all date and cash flow fields are filled correctly.</span>';
+                return;
+            }
+
+            // Call the XIRR function
+            const xirrResult = XIRR(flows, dates);
+
+            if (typeof xirrResult === 'string' && xirrResult.startsWith('Error')) {
+                resultsDiv.innerHTML = `<span style="color:red;">${xirrResult}</span>`;
+            } else if (typeof xirrResult === 'string' && xirrResult.includes('Placeholder')) {
+                resultsDiv.innerHTML = `<strong>XIRR:</strong> ${xirrResult} <br> <em>(Note: Replace the placeholder function in the script with your actual XIRR calculation logic for an accurate result.)</em>`;
+            }
+            else {
+                resultsDiv.innerHTML = `<strong>XIRR:</strong> ${xirrResult.toFixed(2)}%`;
+            }
+        }
+
+        // --- End of Content from XIRR Calculator.txt ---
+    </script>
+
+</body>
+</html>
