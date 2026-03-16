@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Income Tax Calculator FY 2025-26</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f0e; --bg2: #141714; --bg3: #1a1d1a; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+      --green: #4ade80; --amber: #fbbf24; --blue: #60a5fa; --purple: #a78bfa; --red: #f87171;
+      --text: #f0f2f0; --text2: #8a9188; --text3: #5a635a; --card-bg: #141714;
+    }
+    html { font-size: 16px; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); text-decoration: none; letter-spacing: 0.08em; margin-bottom: 2rem; transition: color 0.2s; }
+    .back-link:hover { color: var(--green); }
+    .back-link::before { content: '←'; }
+    header { margin-bottom: 2.5rem; animation: fadeUp 0.6s ease both; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--red); border: 1px solid rgba(248,113,113,0.25); padding: 4px 12px; border-radius: 99px; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; font-weight: 400; }
+    h1 em { font-style: italic; color: var(--red); }
+    .subtitle { margin-top: 0.75rem; font-size: 0.95rem; color: var(--text2); font-weight: 300; max-width: 520px; line-height: 1.6; }
+    .winner-banner { border-radius: 14px; padding: 1.25rem 1.75rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; animation: fadeUp 0.6s 0.05s ease both; }
+    .winner-old { background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.2); }
+    .winner-new { background: rgba(74,222,128,0.06); border: 1px solid rgba(74,222,128,0.2); }
+    .winner-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+    .winner-text { font-family: 'DM Serif Display', serif; font-size: 1.5rem; }
+    .winner-savings { font-family: 'DM Mono', monospace; }
+    .winner-savings .amount { font-size: 1.3rem; font-weight: 500; color: var(--green); }
+    .winner-savings .lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; }
+    .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; animation: fadeUp 0.6s 0.1s ease both; }
+    .section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; }
+    .section-title { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+    .field { margin-bottom: 0.85rem; }
+    .field label { display: block; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
+    .field input { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 12px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; width: 100%; outline: none; transition: border-color 0.2s; }
+    .field input:focus { border-color: rgba(248,113,113,0.4); }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; animation: fadeUp 0.6s 0.15s ease both; }
+    .regime-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; }
+    .regime-title { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+    .tax-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.025); font-size: 12px; }
+    .tax-row:last-of-type { border-bottom: none; }
+    .tax-label { color: var(--text3); }
+    .tax-value { font-family: 'DM Mono', monospace; color: var(--text2); }
+    .tax-total { display: flex; justify-content: space-between; padding: 10px 0 0; margin-top: 6px; border-top: 1px solid var(--border2); }
+    .tax-total .lbl { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; color: var(--text3); }
+    .tax-total .val { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 500; color: var(--red); }
+    .slab-section { margin-top: 1.5rem; animation: fadeUp 0.6s 0.2s ease both; }
+    .slab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .slab-table { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .slab-header { background: var(--bg3); padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
+    .slab-row { display: flex; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.025); font-size: 12px; }
+    .slab-row:last-child { border-bottom: none; }
+    .slab-range { color: var(--text2); }
+    .slab-rate { font-family: 'DM Mono', monospace; color: var(--amber); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 600px) { .inputs-grid, .compare-grid, .slab-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">Back to Home</a>
+  <header>
+    <div class="badge">🧾 Tax</div>
+    <h1>Income Tax <em>Calculator.</em></h1>
+    <p class="subtitle">FY 2025-26 — Compare Old Regime vs New Regime and find the best option for your income.</p>
+  </header>
+
+  <div class="winner-banner" id="winnerBanner">
+    <div>
+      <div class="winner-label">Better Regime</div>
+      <div class="winner-text" id="winnerText">—</div>
+    </div>
+    <div class="winner-savings">
+      <div class="amount" id="winnerSaving">—</div>
+      <div class="lbl">Annual Savings</div>
+    </div>
+  </div>
+
+  <div class="inputs-grid">
+    <div class="section">
+      <div class="section-title" style="color:var(--blue)">📋 Income Details</div>
+      <div class="field"><label>Gross Annual Income (₹)</label><input type="number" id="grossIncome" value="1042968" oninput="recalc()" /></div>
+      <div class="field"><label>Other Income (₹)</label><input type="number" id="otherIncome" value="45000" oninput="recalc()" /></div>
+      <div class="field"><label>Perquisites (₹)</label><input type="number" id="perquisites" value="24000" oninput="recalc()" /></div>
+      <div class="field"><label>HRA Received (₹)</label><input type="number" id="hraReceived" value="224100" oninput="recalc()" /></div>
+      <div class="field"><label>Annual Rent Paid (₹)</label><input type="number" id="rentPaid" value="0" oninput="recalc()" /></div>
+      <div class="field"><label>Metro City?</label>
+        <select id="isMetro" onchange="recalc()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;width:100%;outline:none;">
+          <option value="1">Yes</option><option value="0">No</option>
+        </select>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title" style="color:var(--purple)">🏦 Deductions</div>
+      <div class="field"><label>PF Contribution (₹)</label><input type="number" id="pf" value="44820" oninput="recalc()" /></div>
+      <div class="field"><label>PPF (₹)</label><input type="number" id="ppf" value="36000" oninput="recalc()" /></div>
+      <div class="field"><label>ELSS / Mutual Fund (₹)</label><input type="number" id="elss" value="21000" oninput="recalc()" /></div>
+      <div class="field"><label>NPS 80CCD(1B) (₹, max 50k)</label><input type="number" id="nps" value="48000" oninput="recalc()" /></div>
+      <div class="field"><label>Medical Insurance 80D (₹)</label><input type="number" id="medical" value="0" oninput="recalc()" /></div>
+      <div class="field"><label>Professional Tax (₹)</label><input type="number" id="profTax" value="2400" oninput="recalc()" /></div>
+    </div>
+  </div>
+
+  <div class="compare-grid">
+    <div class="regime-card" id="oldCard">
+      <div class="regime-title" style="color:var(--amber)">Old Regime</div>
+      <div class="tax-row"><span class="tax-label">Taxable Income</span><span class="tax-value" id="old_taxable">—</span></div>
+      <div class="tax-row"><span class="tax-label">80C Deductions</span><span class="tax-value" id="old_80c">—</span></div>
+      <div class="tax-row"><span class="tax-label">HRA Exemption</span><span class="tax-value" id="old_hra">—</span></div>
+      <div class="tax-row"><span class="tax-label">NPS 80CCD(1B)</span><span class="tax-value" id="old_nps">—</span></div>
+      <div class="tax-row"><span class="tax-label">Net Taxable</span><span class="tax-value" id="old_net">—</span></div>
+      <div class="tax-row"><span class="tax-label">Tax Slab</span><span class="tax-value" id="old_slab_tax">—</span></div>
+      <div class="tax-row"><span class="tax-label">Health & Ed. Cess (4%)</span><span class="tax-value" id="old_cess">—</span></div>
+      <div class="tax-total"><span class="lbl">Total Tax</span><span class="val" id="old_total">—</span></div>
+    </div>
+    <div class="regime-card" id="newCard">
+      <div class="regime-title" style="color:var(--green)">New Regime (FY25-26)</div>
+      <div class="tax-row"><span class="tax-label">Taxable Income</span><span class="tax-value" id="new_taxable">—</span></div>
+      <div class="tax-row"><span class="tax-label">Standard Deduction</span><span class="tax-value">₹75,000</span></div>
+      <div class="tax-row"><span class="tax-label">Net Taxable</span><span class="tax-value" id="new_net">—</span></div>
+      <div class="tax-row"><span class="tax-label">Sec 87A Rebate</span><span class="tax-value" id="new_rebate">—</span></div>
+      <div class="tax-row"><span class="tax-label">Tax Slab</span><span class="tax-value" id="new_slab_tax">—</span></div>
+      <div class="tax-row"><span class="tax-label">Health & Ed. Cess (4%)</span><span class="tax-value" id="new_cess">—</span></div>
+      <div class="tax-total"><span class="lbl">Total Tax</span><span class="val" id="new_total">—</span></div>
+    </div>
+  </div>
+
+  <div class="slab-section">
+    <div class="slab-grid">
+      <div class="slab-table">
+        <div class="slab-header" style="color:var(--amber)">Old Regime Slabs</div>
+        <div class="slab-row"><span class="slab-range">Up to ₹2.5L</span><span class="slab-rate">Nil</span></div>
+        <div class="slab-row"><span class="slab-range">₹2.5L – ₹5L</span><span class="slab-rate">5%</span></div>
+        <div class="slab-row"><span class="slab-range">₹5L – ₹10L</span><span class="slab-rate">20%</span></div>
+        <div class="slab-row"><span class="slab-range">Above ₹10L</span><span class="slab-rate">30%</span></div>
+        <div class="slab-row"><span class="slab-range">Sec 87A rebate</span><span class="slab-rate">if income ≤ ₹5L</span></div>
+      </div>
+      <div class="slab-table">
+        <div class="slab-header" style="color:var(--green)">New Regime Slabs (FY25-26)</div>
+        <div class="slab-row"><span class="slab-range">Up to ₹4L</span><span class="slab-rate">Nil</span></div>
+        <div class="slab-row"><span class="slab-range">₹4L – ₹8L</span><span class="slab-rate">5%</span></div>
+        <div class="slab-row"><span class="slab-range">₹8L – ₹12L</span><span class="slab-rate">10%</span></div>
+        <div class="slab-row"><span class="slab-range">₹12L – ₹16L</span><span class="slab-rate">15%</span></div>
+        <div class="slab-row"><span class="slab-range">₹16L – ₹20L</span><span class="slab-rate">20%</span></div>
+        <div class="slab-row"><span class="slab-range">Above ₹20L</span><span class="slab-rate">30%</span></div>
+        <div class="slab-row"><span class="slab-range">Sec 87A rebate</span><span class="slab-rate">if income ≤ ₹12L</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function fmt(n) { return '₹' + Math.round(Math.abs(n)).toLocaleString('en-IN'); }
+
+function calcOldTax(income) {
+  let tax = 0;
+  if (income <= 250000) return 0;
+  if (income <= 500000) tax = (income - 250000) * 0.05;
+  else if (income <= 1000000) tax = 12500 + (income - 500000) * 0.2;
+  else tax = 112500 + (income - 1000000) * 0.3;
+  return Math.max(0, tax);
+}
+
+function calcNewTax(income) {
+  let tax = 0;
+  const slabs = [[0,400000,0],[400000,800000,0.05],[800000,1200000,0.10],[1200000,1600000,0.15],[1600000,2000000,0.20],[2000000,Infinity,0.30]];
+  for (const [lo, hi, rate] of slabs) {
+    if (income > lo) { tax += Math.min(income, hi) > lo ? (Math.min(income, hi) - lo) * rate : 0; }
+  }
+  return Math.max(0, tax);
+}
+
+function calcHRAExemption(hra, basic, rentPaid, isMetro) {
+  if (rentPaid <= 0) return 0;
+  const metroLimit = isMetro ? 0.5 : 0.4;
+  return Math.min(hra, metroLimit * basic, rentPaid - 0.1 * basic);
+}
+
+function recalc() {
+  const gross = +document.getElementById('grossIncome').value || 0;
+  const otherInc = +document.getElementById('otherIncome').value || 0;
+  const perq = +document.getElementById('perquisites').value || 0;
+  const hraReceived = +document.getElementById('hraReceived').value || 0;
+  const rentPaid = +document.getElementById('rentPaid').value || 0;
+  const isMetro = +document.getElementById('isMetro').value;
+  const pf = Math.min(+document.getElementById('pf').value || 0, 150000);
+  const ppf = +document.getElementById('ppf').value || 0;
+  const elss = +document.getElementById('elss').value || 0;
+  const nps = Math.min(+document.getElementById('nps').value || 0, 50000);
+  const medical = Math.min(+document.getElementById('medical').value || 0, 75000);
+  const profTax = Math.min(+document.getElementById('profTax').value || 0, 2500);
+
+  const totalIncome = gross + otherInc + perq;
+
+  // Basic salary estimate (for HRA calc)
+  const basicSalary = gross * 0.358;
+
+  // OLD REGIME
+  const hraExemption = calcHRAExemption(hraReceived, basicSalary, rentPaid, isMetro);
+  const sec80C = Math.min(pf + ppf + elss, 150000);
+  const oldStdDeduction = 50000;
+  let oldTaxable = totalIncome - profTax - oldStdDeduction - hraExemption - sec80C - nps - medical;
+  oldTaxable = Math.max(0, oldTaxable);
+  let oldSlabTax = calcOldTax(oldTaxable);
+  if (oldTaxable <= 500000) oldSlabTax = 0; // 87A rebate
+  const oldCess = oldSlabTax * 0.04;
+  const oldTotal = oldSlabTax + oldCess;
+
+  // NEW REGIME
+  const newStdDeduction = 75000;
+  let newTaxable = totalIncome - profTax - newStdDeduction;
+  newTaxable = Math.max(0, newTaxable);
+  let newSlabTax = calcNewTax(newTaxable);
+  let newRebate = 0;
+  if (newTaxable <= 1200000) { newRebate = newSlabTax; newSlabTax = 0; }
+  const newCess = newSlabTax * 0.04;
+  const newTotal = newSlabTax + newCess;
+
+  document.getElementById('old_taxable').textContent = fmt(totalIncome);
+  document.getElementById('old_80c').textContent = '−' + fmt(sec80C);
+  document.getElementById('old_hra').textContent = '−' + fmt(hraExemption);
+  document.getElementById('old_nps').textContent = '−' + fmt(nps);
+  document.getElementById('old_net').textContent = fmt(oldTaxable);
+  document.getElementById('old_slab_tax').textContent = fmt(calcOldTax(oldTaxable));
+  document.getElementById('old_cess').textContent = fmt(oldCess);
+  document.getElementById('old_total').textContent = fmt(oldTotal);
+
+  document.getElementById('new_taxable').textContent = fmt(totalIncome);
+  document.getElementById('new_net').textContent = fmt(newTaxable);
+  document.getElementById('new_rebate').textContent = newRebate > 0 ? '−' + fmt(newRebate) + ' (Sec 87A)' : '—';
+  document.getElementById('new_slab_tax').textContent = fmt(calcNewTax(newTaxable) - newRebate);
+  document.getElementById('new_cess').textContent = fmt(newCess);
+  document.getElementById('new_total').textContent = fmt(newTotal);
+
+  const banner = document.getElementById('winnerBanner');
+  const isOldBetter = oldTotal < newTotal;
+  banner.className = 'winner-banner ' + (isOldBetter ? 'winner-old' : 'winner-new');
+  document.getElementById('winnerText').textContent = isOldBetter ? 'Old Regime' : 'New Regime';
+  document.getElementById('winnerSaving').textContent = fmt(Math.abs(oldTotal - newTotal)) + ' saved';
+}
+
+recalc();
+</script>
+</body>
+</html>

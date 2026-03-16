@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investment Plan</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f0e; --bg2: #141714; --bg3: #1a1d1a; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+      --green: #4ade80; --amber: #fbbf24; --blue: #60a5fa; --purple: #a78bfa; --red: #f87171;
+      --text: #f0f2f0; --text2: #8a9188; --text3: #5a635a; --card-bg: #141714;
+    }
+    html { font-size: 16px; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); text-decoration: none; letter-spacing: 0.08em; margin-bottom: 2rem; transition: color 0.2s; }
+    .back-link:hover { color: var(--green); }
+    .back-link::before { content: '←'; }
+    header { margin-bottom: 2.5rem; animation: fadeUp 0.6s ease both; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--green); border: 1px solid rgba(74,222,128,0.25); padding: 4px 12px; border-radius: 99px; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; font-weight: 400; }
+    h1 em { font-style: italic; color: var(--green); }
+    .subtitle { margin-top: 0.75rem; font-size: 0.95rem; color: var(--text2); font-weight: 300; max-width: 520px; line-height: 1.6; }
+    .total-banner { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; animation: fadeUp 0.6s 0.05s ease both; }
+    .total-left { display: flex; align-items: center; gap: 1rem; }
+    .total-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+    .total-input { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 14px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 1.1rem; width: 160px; outline: none; transition: border-color 0.2s; }
+    .total-input:focus { border-color: rgba(74,222,128,0.4); }
+    .donut-wrap { position: relative; width: 100px; height: 100px; }
+    svg { transform: rotate(-90deg); }
+    .allocation-grid { display: flex; flex-direction: column; gap: 1.25rem; animation: fadeUp 0.6s 0.1s ease both; }
+    .alloc-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.4rem; }
+    .alloc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .alloc-category { display: flex; align-items: center; gap: 10px; }
+    .alloc-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .alloc-name { font-family: 'DM Serif Display', serif; font-size: 1.2rem; }
+    .alloc-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); }
+    .alloc-pct-input { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 5px 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; width: 70px; outline: none; text-align: right; transition: border-color 0.2s; }
+    .alloc-pct-input:focus { border-color: rgba(74,222,128,0.4); }
+    .instruments-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .instrument-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .instr-name-input { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 7px 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; flex: 1; outline: none; transition: border-color 0.2s; }
+    .instr-name-input:focus { border-color: rgba(74,222,128,0.3); }
+    .instr-amount { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; min-width: 80px; text-align: right; }
+    .add-instr-btn { background: none; border: 1px dashed var(--border2); border-radius: 8px; padding: 6px 12px; color: var(--text3); font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; margin-top: 4px; }
+    .add-instr-btn:hover { border-color: var(--green); color: var(--green); }
+    .remove-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 13px; padding: 2px 6px; transition: color 0.2s; }
+    .remove-btn:hover { color: var(--red); }
+    .bar-track { background: var(--bg3); border-radius: 99px; height: 4px; margin-top: 1rem; }
+    .bar-fill { height: 4px; border-radius: 99px; transition: width 0.3s; }
+    .projection { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.4rem; margin-top: 1.5rem; animation: fadeUp 0.6s 0.2s ease both; }
+    .proj-title { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.25rem; }
+    .proj-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .proj-card { background: var(--bg3); border-radius: 10px; padding: 10px 14px; }
+    .proj-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+    .proj-value { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--green); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 600px) { .proj-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">Back to Home</a>
+  <header>
+    <div class="badge">📈 Plan</div>
+    <h1>Investment <em>Plan.</em></h1>
+    <p class="subtitle">Manage your monthly investment allocation across Equity, Debt, and Gold. Adjust percentages and instruments live.</p>
+  </header>
+
+  <div class="total-banner">
+    <div class="total-left">
+      <div>
+        <div class="total-label">Monthly Investment (₹)</div>
+        <input class="total-input" type="number" id="totalInvestment" value="30000" oninput="recalc()" />
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Annual Investment</div>
+      <div style="font-family:'DM Mono',monospace;font-size:1.25rem;font-weight:500;color:var(--amber)" id="annualTotal">—</div>
+    </div>
+  </div>
+
+  <div class="allocation-grid" id="allocationGrid"></div>
+
+  <div class="projection">
+    <div class="proj-title">Projected Corpus (Blended ~10% CAGR)</div>
+    <div class="proj-grid">
+      <div class="proj-card"><div class="proj-label">5 Years</div><div class="proj-value" id="proj5">—</div></div>
+      <div class="proj-card"><div class="proj-label">10 Years</div><div class="proj-value" id="proj10">—</div></div>
+      <div class="proj-card"><div class="proj-label">20 Years</div><div class="proj-value" id="proj20">—</div></div>
+      <div class="proj-card"><div class="proj-label">30 Years</div><div class="proj-value" id="proj30">—</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const categories = [
+  {
+    name: 'Equity', pct: 60, color: 'var(--green)', bgColor: 'rgba(74,222,128,0.1)',
+    instruments: [
+      { name: 'Multi Asset Fund or Flexicap Fund with consistent performance', amount: 8000 },
+      { name: 'Index Fund e.g., LargeMidcap 250 Index', amount: 8000 },
+      { name: 'Direct Stocks', amount: 2000 },
+    ]
+  },
+  {
+    name: 'Debt', pct: 20, color: 'var(--blue)', bgColor: 'rgba(96,165,250,0.1)',
+    instruments: [
+      { name: 'Corporate Bond Fund or Short/Medium Debt Funds', amount: 6000 },
+    ]
+  },
+  {
+    name: 'Gold', pct: 20, color: 'var(--amber)', bgColor: 'rgba(251,191,36,0.1)',
+    instruments: [
+      { name: 'Gold ETF or MF or Physical', amount: 6000 },
+    ]
+  },
+];
+
+function fmtInr(n) { return '₹' + Math.round(Math.abs(n)).toLocaleString('en-IN'); }
+
+function sipCorpus(monthly, years, rate = 0.10) {
+  const n = years * 12;
+  const rm = rate / 12;
+  return monthly * (Math.pow(1 + rm, n) - 1) / rm;
+}
+
+function recalc() {
+  const total = +document.getElementById('totalInvestment').value || 30000;
+  document.getElementById('annualTotal').textContent = fmtInr(total * 12);
+  ['5','10','20','30'].forEach(y => {
+    document.getElementById(`proj${y}`).textContent = fmtInr(sipCorpus(total, +y));
+  });
+  renderGrid();
+}
+
+function renderGrid() {
+  const total = +document.getElementById('totalInvestment').value || 30000;
+  const container = document.getElementById('allocationGrid');
+  container.innerHTML = '';
+
+  categories.forEach((cat, ci) => {
+    const catAmount = Math.round(total * cat.pct / 100);
+    const div = document.createElement('div');
+    div.className = 'alloc-card';
+    const instrHtml = cat.instruments.map((inst, ii) => `
+      <div class="instrument-row">
+        <input class="instr-name-input" type="text" value="${inst.name}" 
+          oninput="categories[${ci}].instruments[${ii}].name=this.value" />
+        <span class="instr-amount" style="color:${cat.color}">${fmtInr(inst.amount)}/mo</span>
+        <button class="remove-btn" onclick="removeInstr(${ci},${ii})">✕</button>
+      </div>`).join('');
+    div.innerHTML = `
+      <div class="alloc-header">
+        <div class="alloc-category">
+          <div class="alloc-dot" style="background:${cat.color}"></div>
+          <div class="alloc-name">${cat.name}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="alloc-meta">${fmtInr(catAmount)}/mo</div>
+          <input class="alloc-pct-input" type="number" value="${cat.pct}" min="0" max="100"
+            oninput="updatePct(${ci},+this.value)" />
+          <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text3)">%</span>
+        </div>
+      </div>
+      <div class="instruments-list">${instrHtml}</div>
+      <button class="add-instr-btn" onclick="addInstr(${ci})">+ Add Instrument</button>
+      <div class="bar-track"><div class="bar-fill" style="width:${cat.pct}%;background:${cat.color}"></div></div>`;
+    container.appendChild(div);
+  });
+}
+
+function updatePct(ci, val) {
+  categories[ci].pct = val;
+  const total = +document.getElementById('totalInvestment').value || 30000;
+  // rebalance instruments proportionally
+  const catAmount = Math.round(total * val / 100);
+  const n = categories[ci].instruments.length;
+  if (n > 0) {
+    categories[ci].instruments.forEach(inst => inst.amount = Math.round(catAmount / n));
+  }
+  recalc();
+}
+
+function addInstr(ci) {
+  const total = +document.getElementById('totalInvestment').value || 30000;
+  const catAmount = Math.round(total * categories[ci].pct / 100);
+  const n = categories[ci].instruments.length + 1;
+  categories[ci].instruments.push({ name: 'New Instrument', amount: Math.round(catAmount / n) });
+  categories[ci].instruments.forEach(inst => inst.amount = Math.round(catAmount / n));
+  recalc();
+}
+
+function removeInstr(ci, ii) {
+  categories[ci].instruments.splice(ii, 1);
+  recalc();
+}
+
+recalc();
+</script>
+</body>
+</html>

@@ -7,267 +7,138 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0d0f0e;
-      --bg2: #141714;
-      --bg3: #1a1d1a;
-      --border: rgba(255,255,255,0.07);
-      --border2: rgba(255,255,255,0.12);
-      --green: #4ade80;
-      --amber: #fbbf24;
-      --blue: #60a5fa;
-      --purple: #a78bfa;
-      --text: #f0f2f0;
-      --text2: #8a9188;
-      --text3: #5a635a;
-      --card-bg: #141714;
+      --bg: #0d0f0e; --bg2: #141714; --bg3: #1a1d1a;
+      --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+      --green: #4ade80; --amber: #fbbf24; --blue: #60a5fa; --purple: #a78bfa;
+      --orange: #fb923c; --red: #f87171; --teal: #2dd4bf;
+      --text: #f0f2f0; --text2: #8a9188; --text3: #5a635a; --card-bg: #141714;
     }
-
     html { font-size: 16px; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .page {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
-    }
-
-    /* Header */
-    header {
-      margin-bottom: 3.5rem;
-      animation: fadeUp 0.6s ease both;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--green);
-      border: 1px solid rgba(74,222,128,0.25);
-      padding: 4px 12px;
-      border-radius: 99px;
-      margin-bottom: 1rem;
-      letter-spacing: 0.05em;
-    }
-    .badge::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: pulse 2s ease infinite;
-    }
-
-    h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
-      line-height: 1.1;
-      font-weight: 400;
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    header { margin-bottom: 3.5rem; animation: fadeUp 0.6s ease both; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--green); border: 1px solid rgba(74,222,128,0.25); padding: 4px 12px; border-radius: 99px; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.1; font-weight: 400; }
     h1 em { font-style: italic; color: var(--green); }
-
-    .subtitle {
-      margin-top: 0.75rem;
-      font-size: 0.95rem;
-      color: var(--text2);
-      font-weight: 300;
-      max-width: 480px;
-      line-height: 1.6;
-    }
-
-    /* Section label */
-    .section-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.14em;
-      color: var(--text3);
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-      margin-top: 2.5rem;
-      animation: fadeUp 0.6s 0.1s ease both;
-    }
-
-    /* Calculator grid */
-    .calc-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1rem;
-      animation: fadeUp 0.6s 0.15s ease both;
-    }
-
-    .calc-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.4rem 1.5rem;
-      text-decoration: none;
-      display: block;
-      transition: border-color 0.2s, transform 0.2s, background 0.2s;
-      position: relative;
-    }
-    .calc-card:hover {
-      border-color: var(--border2);
-      transform: translateY(-3px);
-      background: var(--bg3);
-    }
-
-    .calc-card-icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-      margin-bottom: 1rem;
-    }
-
+    .subtitle { margin-top: 0.75rem; font-size: 0.95rem; color: var(--text2); font-weight: 300; max-width: 480px; line-height: 1.6; }
+    .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: var(--text3); text-transform: uppercase; margin-bottom: 1rem; margin-top: 2.5rem; animation: fadeUp 0.6s 0.1s ease both; }
+    .calc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .calc-grid.first { animation: fadeUp 0.6s 0.15s ease both; }
+    .calc-grid.second { animation: fadeUp 0.6s 0.2s ease both; }
+    .calc-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.4rem 1.5rem; text-decoration: none; display: block; transition: border-color 0.2s, transform 0.2s, background 0.2s; position: relative; }
+    .calc-card:hover { border-color: var(--border2); transform: translateY(-3px); background: var(--bg3); }
+    .calc-card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 1rem; }
     .icon-green  { background: rgba(74,222,128,0.1);  border: 1px solid rgba(74,222,128,0.2); }
     .icon-blue   { background: rgba(96,165,250,0.1);  border: 1px solid rgba(96,165,250,0.2); }
     .icon-purple { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); }
-
-    .calc-card-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.15rem;
-      font-weight: 400;
-      color: var(--text);
-      margin-bottom: 6px;
-      line-height: 1.2;
-    }
-
-    .calc-card-desc {
-      font-size: 13px;
-      color: var(--text2);
-      font-weight: 300;
-      line-height: 1.5;
-      margin-bottom: 1.25rem;
-    }
-
-    .calc-card-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      color: var(--text3);
-      transition: color 0.2s, gap 0.2s;
-    }
-    .calc-card:hover .calc-card-cta {
-      color: var(--green);
-      gap: 8px;
-    }
+    .icon-orange { background: rgba(251,146,60,0.1);  border: 1px solid rgba(251,146,60,0.2); }
+    .icon-amber  { background: rgba(251,191,36,0.1);  border: 1px solid rgba(251,191,36,0.2); }
+    .icon-red    { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); }
+    .icon-teal   { background: rgba(45,212,191,0.1);  border: 1px solid rgba(45,212,191,0.2); }
+    .calc-card-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; font-weight: 400; color: var(--text); margin-bottom: 6px; line-height: 1.2; }
+    .calc-card-desc { font-size: 13px; color: var(--text2); font-weight: 300; line-height: 1.5; margin-bottom: 1.25rem; }
+    .calc-card-cta { display: inline-flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: var(--text3); transition: color 0.2s, gap 0.2s; }
+    .calc-card:hover .calc-card-cta { gap: 8px; }
     .calc-card-cta::after { content: '→'; }
-
-    /* Note */
-    .note {
-      margin-top: 2.5rem;
-      padding: 1rem 1.25rem;
-      background: rgba(251,191,36,0.05);
-      border: 1px solid rgba(251,191,36,0.15);
-      border-radius: 12px;
-      font-size: 12px;
-      color: var(--text3);
-      font-family: 'DM Mono', monospace;
-      line-height: 1.7;
-      animation: fadeUp 0.6s 0.25s ease both;
-    }
+    .calc-card:hover .cta-green  { color: var(--green); }
+    .calc-card:hover .cta-blue   { color: var(--blue); }
+    .calc-card:hover .cta-purple { color: var(--purple); }
+    .calc-card:hover .cta-orange { color: var(--orange); }
+    .calc-card:hover .cta-amber  { color: var(--amber); }
+    .calc-card:hover .cta-red    { color: var(--red); }
+    .calc-card:hover .cta-teal   { color: var(--teal); }
+    .note { margin-top: 2.5rem; padding: 1rem 1.25rem; background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 12px; font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; line-height: 1.7; animation: fadeUp 0.6s 0.3s ease both; }
     .note strong { color: var(--amber); font-weight: 500; }
-    code {
-      background: var(--bg3);
-      border: 1px solid var(--border2);
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-size: 11px;
-      color: var(--text2);
-    }
-
-    footer {
-      margin-top: 4rem;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text3);
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 0.05em;
-      animation: fadeUp 0.6s 0.3s ease both;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
-    }
-
-    @media (max-width: 560px) {
-      .calc-grid { grid-template-columns: 1fr; }
-    }
+    code { background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px; padding: 1px 5px; font-size: 11px; color: var(--text2); }
+    footer { margin-top: 4rem; text-align: center; font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; letter-spacing: 0.05em; animation: fadeUp 0.6s 0.35s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @media (max-width: 560px) { .calc-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 <div class="page">
-
   <header>
     <div class="badge">Financial Calculators</div>
     <h1>Your money,<br><em>calculated.</em></h1>
-    <p class="subtitle">A suite of financial tools to model investments, withdrawals, and returns — all in one place.</p>
+    <p class="subtitle">A suite of financial tools to model investments, withdrawals, returns, taxes, and life decisions — all in one place.</p>
   </header>
 
   <div class="section-label">Calculators</div>
-
-  <div class="calc-grid">
-
+  <div class="calc-grid first">
     <a href="StepUp_SIP_Calculator.html" class="calc-card">
       <div class="calc-card-icon icon-green">📈</div>
       <div class="calc-card-title">Step-Up SIP Calculator</div>
       <div class="calc-card-desc">Model SIP investments with an initial corpus and annual step-up to see the full power of compounding.</div>
-      <div class="calc-card-cta">Open calculator</div>
+      <div class="calc-card-cta cta-green">Open calculator</div>
     </a>
-
     <a href="swp_calculator.html" class="calc-card">
       <div class="calc-card-icon icon-blue">💰</div>
       <div class="calc-card-title">SWP Calculator</div>
       <div class="calc-card-desc">Simulate systematic withdrawals from your corpus with inflation-adjusted monthly payouts over time.</div>
-      <div class="calc-card-cta">Open calculator</div>
+      <div class="calc-card-cta cta-blue">Open calculator</div>
     </a>
-
     <a href="xirr_calculator.html" class="calc-card">
       <div class="calc-card-icon icon-purple">🧮</div>
       <div class="calc-card-title">XIRR Calculator</div>
       <div class="calc-card-desc">Calculate the true annualised return on irregular cash flows — SIPs, lump sums, and redemptions.</div>
-      <div class="calc-card-cta">Open calculator</div>
+      <div class="calc-card-cta cta-purple">Open calculator</div>
     </a>
+    <a href="electricity_bill_calculator.html" class="calc-card">
+      <div class="calc-card-icon icon-orange">⚡</div>
+      <div class="calc-card-title">Electricity Bill Calculator</div>
+      <div class="calc-card-desc">Track appliance-wise power consumption. Enter your tariff and get accurate monthly & annual electricity cost.</div>
+      <div class="calc-card-cta cta-orange">Open calculator</div>
+    </a>
+    <a href="buy_or_rent.html" class="calc-card">
+      <div class="calc-card-icon icon-purple">🏠</div>
+      <div class="calc-card-title">Buy or Rent House?</div>
+      <div class="calc-card-desc">A decision model comparing net benefit of renting vs buying, with full opportunity cost calculation.</div>
+      <div class="calc-card-cta cta-purple">Open calculator</div>
+    </a>
+    <a href="income_tax_calculator.html" class="calc-card">
+      <div class="calc-card-icon icon-red">🧾</div>
+      <div class="calc-card-title">Income Tax Calculator</div>
+      <div class="calc-card-desc">FY 2025-26 — compare Old vs New Regime with live deduction inputs to find which saves you more.</div>
+      <div class="calc-card-cta cta-red">Open calculator</div>
+    </a>
+  </div>
 
+  <div class="section-label" style="margin-top:2.5rem;">Personal Finance Sheets</div>
+  <div class="calc-grid second">
+    <a href="top_funds.html" class="calc-card">
+      <div class="calc-card-icon icon-blue">📊</div>
+      <div class="calc-card-title">Top Funds Growth</div>
+      <div class="calc-card-desc">Browse & filter 50+ mutual funds by 1Y/3Y/5Y returns, risk rating, expense ratio and category.</div>
+      <div class="calc-card-cta cta-blue">Open sheet</div>
+    </a>
+    <a href="income_details.html" class="calc-card">
+      <div class="calc-card-icon icon-amber">💼</div>
+      <div class="calc-card-title">Income Details</div>
+      <div class="calc-card-desc">Annual salary breakdown with HRA, PF, allowances and visual component analysis.</div>
+      <div class="calc-card-cta cta-amber">Open sheet</div>
+    </a>
+    <a href="goals.html" class="calc-card">
+      <div class="calc-card-icon icon-green">🎯</div>
+      <div class="calc-card-title">Financial Goals</div>
+      <div class="calc-card-desc">Plan goals with inflation-adjusted future values and required monthly SIP. Add as many goals as you need.</div>
+      <div class="calc-card-cta cta-green">Open planner</div>
+    </a>
+    <a href="plan.html" class="calc-card">
+      <div class="calc-card-icon icon-teal">📋</div>
+      <div class="calc-card-title">Investment Plan</div>
+      <div class="calc-card-desc">Manage monthly allocation across Equity, Debt, and Gold with live corpus projections over 5–30 years.</div>
+      <div class="calc-card-cta cta-teal">Open plan</div>
+    </a>
   </div>
 
   <div class="note">
-    <strong>Note —</strong> Ensure all linked files (<code>StepUp_SIP_Calculator.html</code>, <code>swp_calculator.html</code>, <code>xirr_calculator.html</code>) are in the same folder as this <code>index.html</code> when hosting on GitHub Pages.
+    <strong>Note —</strong> Ensure all files are in the same folder as this <code>index.html</code> when hosting on GitHub Pages. All tools work fully offline — no external data required.
   </div>
-
   <footer>Built with ♥ · Hosted on GitHub Pages · All calculations are illustrative</footer>
-
 </div>
 </body>
 </html>

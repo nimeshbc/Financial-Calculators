@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Top Mutual Funds Growth</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f0e; --bg2: #141714; --bg3: #1a1d1a;
+      --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+      --green: #4ade80; --amber: #fbbf24; --blue: #60a5fa; --purple: #a78bfa;
+      --text: #f0f2f0; --text2: #8a9188; --text3: #5a635a; --card-bg: #141714;
+    }
+    html { font-size: 16px; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); text-decoration: none; letter-spacing: 0.08em; margin-bottom: 2rem; transition: color 0.2s; }
+    .back-link:hover { color: var(--green); }
+    .back-link::before { content: '←'; }
+    header { margin-bottom: 2.5rem; animation: fadeUp 0.6s ease both; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--blue); border: 1px solid rgba(96,165,250,0.25); padding: 4px 12px; border-radius: 99px; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; font-weight: 400; }
+    h1 em { font-style: italic; color: var(--blue); }
+    .subtitle { margin-top: 0.75rem; font-size: 0.95rem; color: var(--text2); font-weight: 300; max-width: 520px; line-height: 1.6; }
+    .filters { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; animation: fadeUp 0.6s 0.1s ease both; }
+    .filter-input { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s; }
+    .filter-input:focus { border-color: rgba(96,165,250,0.4); }
+    select.filter-input { cursor: pointer; }
+    .stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; animation: fadeUp 0.6s 0.12s ease both; }
+    .stat-pill { background: var(--card-bg); border: 1px solid var(--border); border-radius: 99px; padding: 6px 16px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); }
+    .stat-pill span { color: var(--blue); }
+    .table-wrap { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; overflow-x: auto; animation: fadeUp 0.6s 0.15s ease both; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    thead tr { background: var(--bg3); }
+    th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); cursor: pointer; white-space: nowrap; user-select: none; }
+    th:hover { color: var(--blue); }
+    th.sorted { color: var(--blue); }
+    td { padding: 10px 12px; font-size: 12px; color: var(--text2); border-bottom: 1px solid rgba(255,255,255,0.03); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.015); }
+    .fund-name { color: var(--text); font-size: 12px; max-width: 280px; line-height: 1.4; }
+    .category-tag { display: inline-block; background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); border-radius: 6px; padding: 2px 8px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--purple); white-space: nowrap; }
+    .ret { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+    .ret.pos { color: var(--green); }
+    .ret.neg { color: #f87171; }
+    .ret.na { color: var(--text3); }
+    .exp { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--amber); }
+    .risk-tag { display: inline-block; border-radius: 5px; padding: 2px 7px; font-family: 'DM Mono', monospace; font-size: 10px; white-space: nowrap; }
+    .risk-Low { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+    .risk-Below { background: rgba(96,165,250,0.08); color: var(--blue); border: 1px solid rgba(96,165,250,0.18); }
+    .risk-Avg { background: rgba(251,191,36,0.08); color: var(--amber); border: 1px solid rgba(251,191,36,0.18); }
+    .risk-Above { background: rgba(251,146,60,0.08); color: #fb923c; border: 1px solid rgba(251,146,60,0.18); }
+    .risk-High { background: rgba(248,113,113,0.08); color: #f87171; border: 1px solid rgba(248,113,113,0.18); }
+    .return-High { color: var(--green); }
+    .return-Above { color: var(--blue); }
+    .return-Avg { color: var(--amber); }
+    .return-Low { color: #f87171; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">Back to Home</a>
+  <header>
+    <div class="badge">📊 Mutual Funds</div>
+    <h1>Top Funds <em>Growth.</em></h1>
+    <p class="subtitle">Browse, filter and sort 100+ mutual funds by returns, risk and category. Click column headers to sort.</p>
+  </header>
+
+  <div class="filters">
+    <input class="filter-input" type="text" id="searchInput" placeholder="Search fund name..." oninput="applyFilters()" style="min-width:220px;" />
+    <select class="filter-input" id="categoryFilter" onchange="applyFilters()">
+      <option value="">All Categories</option>
+    </select>
+    <select class="filter-input" id="riskFilter" onchange="applyFilters()">
+      <option value="">All Risk Levels</option>
+      <option value="Low">Low</option>
+      <option value="Below Avg.">Below Avg.</option>
+      <option value="Avg.">Avg.</option>
+      <option value="Above Avg.">Above Avg.</option>
+      <option value="High">High</option>
+    </select>
+    <select class="filter-input" id="returnFilter" onchange="applyFilters()">
+      <option value="">All Return Ratings</option>
+      <option value="High">High</option>
+      <option value="Above Avg.">Above Avg.</option>
+      <option value="Avg.">Avg.</option>
+      <option value="Low">Low</option>
+    </select>
+  </div>
+
+  <div class="stats">
+    <div class="stat-pill">Showing <span id="countShown">—</span> funds</div>
+    <div class="stat-pill">Avg 1Y: <span id="avg1y">—</span>%</div>
+    <div class="stat-pill">Avg 3Y: <span id="avg3y">—</span>%</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('name')">Fund Name</th>
+          <th onclick="sortBy('category')">Category</th>
+          <th onclick="sortBy('ret1y')" id="th_ret1y">1Y %</th>
+          <th onclick="sortBy('ret3y')" id="th_ret3y">3Y %</th>
+          <th onclick="sortBy('ret5y')" id="th_ret5y">5Y %</th>
+          <th onclick="sortBy('expense')" id="th_expense">Exp.</th>
+          <th onclick="sortBy('risk')">Risk</th>
+          <th onclick="sortBy('return')">Return</th>
+        </tr>
+      </thead>
+      <tbody id="fundsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const rawFunds = [
+  ["SBI Infrastructure Fund - Direct Plan","Equity: Sectoral-Infrastructure",13.87,21.51,20.63,2.45,"Below Avg.","Above Avg."],
+  ["Taurus Infrastructure Fund - Direct Plan","Equity: Sectoral-Infrastructure",4.13,20.87,"--",2.14,"Low","Avg."],
+  ["Parag Parikh Flexi Cap Fund - Direct Plan","Equity: Flexi Cap",4.89,26.5,15.13,1.94,"Low","High"],
+  ["JM Large Cap Fund - Direct Plan","Equity: Large Cap",6.93,15.37,11.82,1.77,"Low","Low"],
+  ["ICICI Prudential Infrastructure Fund - Direct Plan","Equity: Sectoral-Infrastructure",20.58,23.1,7.42,1.71,"Avg.","Above Avg."],
+  ["Union Long Term Equity Fund - Direct Plan","Equity: ELSS",8.91,22.38,"--",1.63,"Below Avg.","Above Avg."],
+  ["JM Tax Gain Fund - Direct Plan","Equity: ELSS",6.25,19.9,12.15,1.61,"Above Avg.","Above Avg."],
+  ["IDBI Focused 30 Equity Fund - Direct Plan","Equity: Large Cap",10.1,18.92,8.31,1.61,"Avg.","Above Avg."],
+  ["Nippon India Consumption Fund - Direct Plan","Equity: Thematic-Consumption",19.73,27.23,14.6,1.29,"Avg.","High"],
+  ["ICICI Prudential Value Discovery Fund - Direct Plan","Equity: Value Oriented",15.46,24.33,8.16,1.28,"Low","Above Avg."],
+  ["SBI Contra Fund - Direct Plan","Equity: Value Oriented",17.39,30.83,18.7,1.27,"Avg.","High"],
+  ["ICICI Prudential Equity & Debt Fund - Direct Plan","Hybrid: Aggressive Hybrid",16.75,21.59,7.32,1.25,"Avg.","High"],
+  ["Nippon India Growth Fund - Direct Plan","Equity: Mid Cap",10.01,26.75,14.83,1.24,"Avg.","Above Avg."],
+  ["ICICI Prudential Multi Asset Fund - Direct Plan","Hybrid: Multi Asset Allocation",18.83,20.4,7.47,1.2,"High","Above Avg."],
+  ["SBI Large & Midcap Fund - Direct Plan","Equity: Large & MidCap",9.92,22.36,20.89,1.18,"Avg.","Above Avg."],
+  ["Parag Parikh Tax Saver Fund - Direct Plan","Equity: ELSS",12.17,24.88,15.15,0.84,"Low","High"],
+  ["DSP Tax Saver Fund - Direct Plan","Equity: ELSS",3.94,21.23,6.66,0.84,"Avg.","Above Avg."],
+  ["Motilal Oswal Midcap 30 Fund - Direct Plan","Equity: Mid Cap",28.26,28.91,14.37,0.96,"Avg.","Avg."],
+  ["Mirae Asset Emerging Bluechip Fund - Direct Plan","Equity: Large & MidCap",4.62,24.35,13.71,0.71,"Low","High"],
+  ["Mirae Asset Midcap Fund - Direct Plan","Equity: Mid Cap",10.2,30.54,13.88,0.65,"Below Avg.","Above Avg."],
+  ["Nippon India Small Cap Fund - Direct Plan","Equity: Small Cap",13.01,35.81,15.1,1.04,"Avg.","Above Avg."],
+  ["SBI Small Cap Fund - Direct Plan","Equity: Small Cap",15.22,33.06,"--",0.76,"Below Avg.","Above Avg."],
+  ["Bank of India Small Cap Fund - Direct Plan","Equity: Small Cap",8.93,42.04,6.22,1.12,"Below Avg.","High"],
+  ["Kotak Bluechip Fund - Direct Plan","Equity: Large Cap",6.69,20.08,12.21,0.78,"Below Avg.","High"],
+  ["ICICI Prudential Bluechip Fund - Direct Plan","Equity: Large Cap",10.13,18.62,7.27,1.07,"Below Avg.","Above Avg."],
+  ["Canara Robeco Equity Tax Saver Fund - Direct Plan","Equity: ELSS",7.54,24.25,6.61,0.66,"Low","Above Avg."],
+  ["IDFC Tax Advantage (ELSS) Fund - Direct Plan","Equity: ELSS",9.56,25.34,9.69,0.77,"High","Above Avg."],
+  ["Kotak Tax Saver - Direct Plan","Equity: ELSS",9.18,21.35,13.08,0.75,"Below Avg.","Above Avg."],
+  ["Axis Flexi Cap Fund - Direct Plan","Equity: Flexi Cap",2.53,17.61,5.46,0.66,"Below Avg.","Avg."],
+  ["SBI Focused Equity Fund - Direct Plan","Equity: Flexi Cap",6.13,20.04,20.28,0.69,"Avg.","Above Avg."],
+  ["IIFL Focused Equity Fund - Direct Plan","Equity: Flexi Cap",4.65,23.58,9.87,0.9,"Below Avg.","High"],
+  ["Quant Infrastructure Fund - Direct Plan","Equity: Sectoral-Infrastructure",24.4,40.1,16.3,0.64,"Avg.","High"],
+  ["Invesco India Infrastructure Fund - Direct Plan","Equity: Sectoral-Infrastructure",10.92,26.44,11.14,0.99,"Low","High"],
+  ["IDFC Sterling Value Fund - Direct Plan","Equity: Value Oriented",10.66,26.97,9.66,0.86,"Above Avg.","High"],
+  ["Kotak India EQ Contra Fund - Direct Plan","Equity: Value Oriented",7.66,20.22,12.85,0.9,"Below Avg.","Above Avg."],
+  ["Invesco India Mid Cap Fund - Direct Plan","Equity: Mid Cap",5.62,26.09,11.55,0.69,"Below Avg.","Above Avg."],
+  ["SBI Equity Hybrid Fund - Direct Plan","Hybrid: Aggressive Hybrid",7.52,15.9,19.45,0.85,"Low","Above Avg."],
+  ["Kotak Equity Hybrid Fund - Direct Plan","Hybrid: Aggressive Hybrid",9.3,20.22,12.72,0.64,"Avg.","Above Avg."],
+  ["Baroda BNP Paribas Aggressive Hybrid Fund - Direct Plan","Hybrid: Aggressive Hybrid",5.1,18.13,6.31,0.65,"Low","Above Avg."],
+  ["ICICI Prudential Balanced Advantage Fund - Direct Plan","Hybrid: Dynamic Asset Allocation",9.09,13.97,7.23,0.95,"Below Avg.","Above Avg."],
+  ["Kotak Equity Savings Fund - Direct Plan","Hybrid: Equity Savings",8.57,11.07,12.83,1.12,"Below Avg.","Above Avg."],
+  ["Edelweiss Equity Savings Fund - Direct Plan","Hybrid: Equity Savings",4.73,11.18,6.71,0.71,"Low","Above Avg."],
+  ["ICICI Prudential Credit Risk Fund - Direct Plan","Debt: Credit Risk",5.61,8.24,7.31,0.88,"Below Avg.","Above Avg."],
+  ["HDFC Credit Risk Debt Fund - Direct Plan","Debt: Credit Risk",4.31,8.01,6.92,0.95,"Avg.","Above Avg."],
+  ["SBI Credit Risk Fund - Direct Plan","Debt: Credit Risk",4.54,7.09,18.78,0.92,"Below Avg.","Avg."],
+  ["ICICI Prudential Medium Term Bond Fund - Direct Plan","Debt: Medium Duration",4.51,7.87,7.43,0.75,"Below Avg.","High"],
+  ["SBI Dynamic Bond Fund - Direct Plan","Debt: Dynamic Bond",2.7,5.62,18.91,0.87,"Avg.","Avg."],
+  ["SBI Magnum Income Fund - Direct Plan","Debt: Medium to Long Duration",2.45,7.06,22.84,0.8,"Below Avg.","Above Avg."],
+  ["Mahindra Manulife Large Cap Pragati Yojana - Direct Plan","Equity: Large Cap",7.25,18.81,13.56,0.73,"Below Avg.","High"],
+  ["LIC MF Large & Mid Cap Fund - Direct Plan","Equity: Large & MidCap",10.91,21.14,13.26,0.88,"Below Avg.","Above Avg."],
+  ["Baroda BNP Paribas Large Cap Fund - Direct Plan","Equity: Large Cap",8.08,18.14,"--",0.98,"Low","Avg."],
+  ["Aditya Birla Sun Life Medium Term Plan - Direct Plan","Debt: Medium Duration",24.7,10.18,5.12,0.87,"High","High"],
+  ["Baroda BNP Paribas Credit Risk Fund","Debt: Credit Risk",13.52,8.62,6.41,0.78,"Avg.","High"],
+  ["Edelweiss Government Securities Fund - Direct Plan","Debt: Gilt",3.56,6.51,6.74,0.69,"Avg.","High"],
+  ["LIC MF Government Securities Fund - Direct Plan","Debt: Gilt",2.02,5.42,13.19,0.76,"Low","Avg."],
+];
+
+let sorted = { col: 'ret3y', dir: -1 };
+let filtered = [...rawFunds];
+
+function populateCategories() {
+  const cats = [...new Set(rawFunds.map(f => f[1]))].sort();
+  const sel = document.getElementById('categoryFilter');
+  cats.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+function retClass(val) {
+  if (val === '--' || val == null) return 'ret na';
+  return val >= 0 ? 'ret pos' : 'ret neg';
+}
+
+function riskClass(r) {
+  if (!r) return 'risk-tag';
+  if (r === 'Low') return 'risk-tag risk-Low';
+  if (r.startsWith('Below')) return 'risk-tag risk-Below';
+  if (r === 'Avg.') return 'risk-tag risk-Avg';
+  if (r.startsWith('Above')) return 'risk-tag risk-Above';
+  return 'risk-tag risk-High';
+}
+
+function returnClass(r) {
+  if (r === 'High') return 'return-High';
+  if (r === 'Above Avg.') return 'return-Above';
+  if (r === 'Avg.') return 'return-Avg';
+  return 'return-Low';
+}
+
+function renderTable() {
+  const tbody = document.getElementById('fundsBody');
+  tbody.innerHTML = '';
+  filtered.forEach(f => {
+    const [name, cat, r1, r3, r5, exp, risk, ret] = f;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="fund-name">${name}</td>
+      <td><span class="category-tag">${cat.split(':')[1]?.trim() || cat}</span></td>
+      <td><span class="${retClass(r1)}">${r1 !== '--' && r1 != null ? r1+'%' : '—'}</span></td>
+      <td><span class="${retClass(r3)}">${r3 !== '--' && r3 != null ? r3+'%' : '—'}</span></td>
+      <td><span class="${retClass(r5)}">${r5 !== '--' && r5 != null ? r5+'%' : '—'}</span></td>
+      <td class="exp">${exp}%</td>
+      <td><span class="${riskClass(risk)}">${risk}</span></td>
+      <td class="${returnClass(ret)}" style="font-family:'DM Mono',monospace;font-size:11px;">${ret}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('countShown').textContent = filtered.length;
+  const nums1 = filtered.map(f => f[2]).filter(v => v !== '--' && v != null);
+  const nums3 = filtered.map(f => f[3]).filter(v => v !== '--' && v != null);
+  document.getElementById('avg1y').textContent = nums1.length ? (nums1.reduce((a,b)=>a+b,0)/nums1.length).toFixed(1) : '—';
+  document.getElementById('avg3y').textContent = nums3.length ? (nums3.reduce((a,b)=>a+b,0)/nums3.length).toFixed(1) : '—';
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const cat = document.getElementById('categoryFilter').value;
+  const risk = document.getElementById('riskFilter').value;
+  const ret = document.getElementById('returnFilter').value;
+  filtered = rawFunds.filter(f => {
+    if (search && !f[0].toLowerCase().includes(search)) return false;
+    if (cat && f[1] !== cat) return false;
+    if (risk && f[6] !== risk) return false;
+    if (ret && f[7] !== ret) return false;
+    return true;
+  });
+  sortFiltered();
+  renderTable();
+}
+
+function sortBy(col) {
+  if (sorted.col === col) sorted.dir *= -1;
+  else { sorted.col = col; sorted.dir = -1; }
+  sortFiltered();
+  renderTable();
+}
+
+function numVal(v) { return (v === '--' || v == null) ? -999 : v; }
+
+function sortFiltered() {
+  const colMap = { name: 0, category: 1, ret1y: 2, ret3y: 3, ret5y: 4, expense: 5, risk: 6, return: 7 };
+  const idx = colMap[sorted.col] ?? 3;
+  filtered.sort((a, b) => {
+    const av = typeof a[idx] === 'string' ? a[idx] : numVal(a[idx]);
+    const bv = typeof b[idx] === 'string' ? b[idx] : numVal(b[idx]);
+    if (av < bv) return sorted.dir;
+    if (av > bv) return -sorted.dir;
+    return 0;
+  });
+}
+
+populateCategories();
+applyFilters();
+</script>
+</body>
+</html>

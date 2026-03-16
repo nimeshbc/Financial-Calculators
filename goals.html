@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Goals Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f0e; --bg2: #141714; --bg3: #1a1d1a; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+      --green: #4ade80; --amber: #fbbf24; --blue: #60a5fa; --purple: #a78bfa; --red: #f87171;
+      --text: #f0f2f0; --text2: #8a9188; --text3: #5a635a; --card-bg: #141714;
+    }
+    html { font-size: 16px; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); text-decoration: none; letter-spacing: 0.08em; margin-bottom: 2rem; transition: color 0.2s; }
+    .back-link:hover { color: var(--green); }
+    .back-link::before { content: '←'; }
+    header { margin-bottom: 2.5rem; animation: fadeUp 0.6s ease both; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--green); border: 1px solid rgba(74,222,128,0.25); padding: 4px 12px; border-radius: 99px; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; font-weight: 400; }
+    h1 em { font-style: italic; color: var(--green); }
+    .subtitle { margin-top: 0.75rem; font-size: 0.95rem; color: var(--text2); font-weight: 300; max-width: 520px; line-height: 1.6; }
+    .goals-list { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2.5rem; animation: fadeUp 0.6s 0.1s ease both; }
+    .goal-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+    .goal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .goal-name { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--text); }
+    .horizon-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 10px; border-radius: 6px; background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); color: var(--green); }
+    .goal-inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+    .g-field label { display: block; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+    .g-field input { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 7px 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; width: 100%; outline: none; transition: border-color 0.2s; }
+    .g-field input:focus { border-color: rgba(74,222,128,0.4); }
+    .goal-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    .g-result { background: var(--bg3); border-radius: 10px; padding: 10px 14px; }
+    .g-result-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+    .g-result-value { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; }
+    .add-goal-btn { background: transparent; border: 1px dashed rgba(74,222,128,0.3); border-radius: 12px; padding: 1rem; width: 100%; text-align: center; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); cursor: pointer; transition: all 0.2s; letter-spacing: 0.06em; }
+    .add-goal-btn:hover { border-color: var(--green); color: var(--green); }
+    .note { margin-top: 2rem; padding: 1rem 1.25rem; background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 12px; font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; line-height: 1.7; animation: fadeUp 0.6s 0.2s ease both; }
+    .note strong { color: var(--amber); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 600px) { .goal-inputs { grid-template-columns: 1fr 1fr; } .goal-results { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">Back to Home</a>
+  <header>
+    <div class="badge">🎯 Goals</div>
+    <h1>Financial <em>Goals.</em></h1>
+    <p class="subtitle">Plan your financial goals with inflation-adjusted future values and required SIP calculations.</p>
+  </header>
+
+  <div class="goals-list" id="goalsList"></div>
+  <button class="add-goal-btn" onclick="addGoal()">+ Add New Goal</button>
+
+  <div class="note">
+    <strong>Note —</strong> SIP calculation uses a fixed post-tax ROI. Adjust the ROI field based on your expected investment returns. For short-term goals, prefer safer instruments like bank RD or liquid funds.
+  </div>
+</div>
+
+<script>
+let goals = [
+  { name: 'Car Down Payment', currentCost: 10000000, inflation: 7, years: 5, roi: 6, horizon: 'Long' },
+];
+
+let goalIdCounter = 0;
+
+function fmtInr(n) { return '₹' + Math.round(Math.abs(n)).toLocaleString('en-IN'); }
+
+function calcFV(current, inflation, years) {
+  return current * Math.pow(1 + inflation / 100, years);
+}
+
+function calcSIP(fv, roi, years) {
+  const n = years * 12;
+  const rm = roi / 100 / 12;
+  if (rm === 0) return fv / n;
+  return fv * rm / (Math.pow(1 + rm, n) - 1);
+}
+
+function renderGoals() {
+  const container = document.getElementById('goalsList');
+  container.innerHTML = '';
+  goals.forEach((g, i) => {
+    const fv = calcFV(g.currentCost, g.inflation, g.years);
+    const sip = calcSIP(fv, g.roi, g.years);
+    const colors = ['var(--green)','var(--blue)','var(--purple)','var(--amber)'];
+    const c = colors[i % colors.length];
+    const div = document.createElement('div');
+    div.className = 'goal-card';
+    div.innerHTML = `
+      <div class="goal-header">
+        <div class="goal-name">${g.name}</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="horizon-tag">${g.horizon} Term</span>
+          <button onclick="removeGoal(${i})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;" title="Remove">✕</button>
+        </div>
+      </div>
+      <div class="goal-inputs">
+        <div class="g-field"><label>Goal Name</label><input type="text" value="${g.name}" oninput="updateGoal(${i},'name',this.value)" /></div>
+        <div class="g-field"><label>Current Cost (₹)</label><input type="number" value="${g.currentCost}" oninput="updateGoal(${i},'currentCost',+this.value)" /></div>
+        <div class="g-field"><label>Inflation (%/yr)</label><input type="number" value="${g.inflation}" step="0.5" oninput="updateGoal(${i},'inflation',+this.value)" /></div>
+        <div class="g-field"><label>Years Until Goal</label><input type="number" value="${g.years}" min="1" oninput="updateGoal(${i},'years',+this.value)" /></div>
+        <div class="g-field"><label>Post-Tax ROI (%)</label><input type="number" value="${g.roi}" step="0.5" oninput="updateGoal(${i},'roi',+this.value)" /></div>
+        <div class="g-field"><label>Horizon</label>
+          <select onchange="updateGoal(${i},'horizon',this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;width:100%;outline:none;">
+            <option ${g.horizon==='Short'?'selected':''}>Short</option>
+            <option ${g.horizon==='Medium'?'selected':''}>Medium</option>
+            <option ${g.horizon==='Long'?'selected':''}>Long</option>
+          </select>
+        </div>
+      </div>
+      <div class="goal-results">
+        <div class="g-result">
+          <div class="g-result-label">Future Value</div>
+          <div class="g-result-value" style="color:${c}">${fmtInr(fv)}</div>
+        </div>
+        <div class="g-result">
+          <div class="g-result-label">Monthly SIP</div>
+          <div class="g-result-value" style="color:var(--amber)">${fmtInr(sip)}/mo</div>
+        </div>
+        <div class="g-result">
+          <div class="g-result-label">Total Investment</div>
+          <div class="g-result-value" style="color:var(--text2)">${fmtInr(sip * g.years * 12)}</div>
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function updateGoal(i, key, val) {
+  goals[i][key] = val;
+  renderGoals();
+}
+
+function removeGoal(i) {
+  goals.splice(i, 1);
+  renderGoals();
+}
+
+function addGoal() {
+  goals.push({ name: 'New Goal', currentCost: 1000000, inflation: 6, years: 5, roi: 10, horizon: 'Medium' });
+  renderGoals();
+}
+
+renderGoals();
+</script>
+</body>
+</html>
