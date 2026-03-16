@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIP Wealth Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f0e;
+      --bg2: #141714;
+      --bg3: #1a1d1a;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --green: #4ade80;
+      --green-dim: #1a3d26;
+      --green-mid: #22c55e;
+      --amber: #fbbf24;
+      --purple: #a78bfa;
+      --text: #f0f2f0;
+      --text2: #8a9188;
+      --text3: #5a635a;
+      --accent: #4ade80;
+      --card-bg: #141714;
+      --track: #2a2e2a;
+      --thumb: #4ade80;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 3rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--green);
+      border: 1px solid rgba(74,222,128,0.25);
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease infinite;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      line-height: 1.1;
+      font-weight: 400;
+      color: var(--text);
+      max-width: 640px;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--green);
+    }
+    .subtitle {
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: var(--text2);
+      font-weight: 300;
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .card-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Sliders */
+    .slider-group {
+      margin-bottom: 1.25rem;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .slider-label {
+      font-size: 13px;
+      color: var(--text2);
+      font-weight: 300;
+    }
+    .slider-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--green);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--track);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--thumb);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 3px rgba(74,222,128,0.15);
+      transition: box-shadow 0.2s;
+    }
+    input[type=range]:hover::-webkit-slider-thumb {
+      box-shadow: 0 0 0 6px rgba(74,222,128,0.2);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--thumb);
+      border: 2px solid var(--bg);
+    }
+
+    /* Metric cards */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .metric {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: var(--text3);
+      font-weight: 400;
+      margin-bottom: 4px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+    .metric-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .metric-value.highlight { color: var(--green); }
+    .metric-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 3px;
+    }
+
+    /* Chart area */
+    .chart-card {
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      height: 280px;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text2);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Table */
+    .table-card {
+      margin-top: 1.5rem;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .table-scroll { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead tr {
+      border-bottom: 1px solid var(--border2);
+    }
+    th {
+      padding: 8px 12px;
+      text-align: right;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--text3);
+      text-transform: uppercase;
+    }
+    th:first-child { text-align: left; }
+    td {
+      padding: 9px 12px;
+      text-align: right;
+      color: var(--text2);
+      border-bottom: 1px solid var(--border);
+    }
+    td:first-child { text-align: left; color: var(--text3); font-family: 'DM Mono', monospace; }
+    td:last-child { color: var(--green); font-weight: 500; }
+    tbody tr:hover { background: var(--bg3); }
+
+    /* Divider in sliders */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 4rem;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    /* Responsive */
+    @media (max-width: 560px) {
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .metric-value { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="badge">SIP · Step-up · Compound Interest</div>
+    <h1>Watch your money<br><em>grow itself.</em></h1>
+    <p class="subtitle">Model your SIP investments with an initial corpus and annual step-up to see the true power of compounding.</p>
+  </header>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Final corpus</div>
+      <div class="metric-value highlight" id="mFinal">—</div>
+      <div class="metric-sub" id="mMultiple">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Wealth gained</div>
+      <div class="metric-value" id="mGained">—</div>
+      <div class="metric-sub" id="mGainedPct">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total invested</div>
+      <div class="metric-value" id="mInvested">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Final SIP/month</div>
+      <div class="metric-value" id="mFinalSip">—</div>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- Controls -->
+    <div class="card" style="animation-delay: 0.05s;">
+      <div class="card-title">Inputs</div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Initial corpus</span>
+          <span class="slider-value" id="vLump">₹5,00,000</span>
+        </div>
+        <input type="range" id="sLump" min="0" max="10000000" step="50000" value="500000">
+      </div>
+
+      <hr class="divider">
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Monthly SIP</span>
+          <span class="slider-value" id="vSip">₹10,000</span>
+        </div>
+        <input type="range" id="sSip" min="500" max="200000" step="500" value="10000">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Annual step-up</span>
+          <span class="slider-value" id="vStep">10%</span>
+        </div>
+        <input type="range" id="sStep" min="0" max="50" step="1" value="10">
+      </div>
+
+      <hr class="divider">
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Expected annual return</span>
+          <span class="slider-value" id="vRate">12%</span>
+        </div>
+        <input type="range" id="sRate" min="1" max="30" step="0.5" value="12">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Investment period</span>
+          <span class="slider-value" id="vYears">20 years</span>
+        </div>
+        <input type="range" id="sYears" min="1" max="40" step="1" value="20">
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div>
+      <div class="card chart-card">
+        <div class="card-title">Growth over time</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#4ade80;"></div>Total corpus</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#378ADD;"></div>SIP invested</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a78bfa; opacity:0.8;"></div>Lump sum growth</div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card table-card">
+        <div class="card-title">Year-by-year breakdown</div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Monthly SIP</th>
+                <th>Total invested</th>
+                <th>Lump sum value</th>
+                <th>SIP value</th>
+                <th>Total corpus</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>Built with ♥ · Hosted on GitHub Pages · All calculations are illustrative</footer>
+
+</div>
+
+<script>
+  let chart;
+
+  function fmt(n) {
+    if (n >= 10000000) return '₹' + (n/10000000).toFixed(2) + ' Cr';
+    if (n >= 100000)   return '₹' + (n/100000).toFixed(2) + ' L';
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
+  function fmtA(n) {
+    if (n >= 10000000) return '₹' + (n/10000000).toFixed(1) + 'Cr';
+    if (n >= 100000)   return '₹' + (n/100000).toFixed(1) + 'L';
+    return '₹' + Math.round(n/1000) + 'K';
+  }
+
+  function get(id) { return parseFloat(document.getElementById(id).value); }
+
+  function update() {
+    const lump    = get('sLump');
+    const sipBase = get('sSip');
+    const step    = get('sStep');
+    const rate    = get('sRate');
+    const years   = parseInt(get('sYears'));
+    const mr      = rate / 100 / 12;
+
+    // Update labels
+    document.getElementById('vLump').textContent  = fmt(lump);
+    document.getElementById('vSip').textContent   = fmt(sipBase);
+    document.getElementById('vStep').textContent  = step + '%';
+    document.getElementById('vRate').textContent  = rate + '%';
+    document.getElementById('vYears').textContent = years + (years === 1 ? ' year' : ' years');
+
+    const labels = [], corpusArr = [], sipInvArr = [], lumpArr = [];
+    const tableRows = [];
+    let sipPortfolio = 0, totalSipInvested = 0;
+
+    for (let y = 0; y <= years; y++) {
+      const lumpVal = lump * Math.pow(1 + mr, y * 12);
+      labels.push(y === 0 ? 'Now' : 'Yr ' + y);
+      corpusArr.push(Math.round(lumpVal + sipPortfolio));
+      sipInvArr.push(Math.round(totalSipInvested));
+      lumpArr.push(Math.round(lumpVal));
+
+      if (y < years) {
+        const sipY = sipBase * Math.pow(1 + step / 100, y);
+        for (let m = 0; m < 12; m++) {
+          sipPortfolio = (sipPortfolio + sipY) * (1 + mr);
+          totalSipInvested += sipY;
+        }
+        const lumpNext = lump * Math.pow(1 + mr, (y+1)*12);
+        tableRows.push({ year: y+1, sip: sipY, invested: totalSipInvested + lump, lumpVal: lumpNext, sipVal: sipPortfolio, corpus: lumpNext + sipPortfolio });
+      }
+    }
+
+    const final   = corpusArr[corpusArr.length - 1];
+    const invested = lump + sipInvArr[sipInvArr.length - 1];
+    const finalSip = sipBase * Math.pow(1 + step/100, Math.max(0, years-1));
+    const multiple = (final / invested).toFixed(2);
+
+    document.getElementById('mFinal').textContent    = fmt(final);
+    document.getElementById('mMultiple').textContent = multiple + 'x your money';
+    document.getElementById('mGained').textContent   = fmt(final - invested);
+    document.getElementById('mGainedPct').textContent = ((final-invested)/invested*100).toFixed(1) + '% total return';
+    document.getElementById('mInvested').textContent = fmt(invested);
+    document.getElementById('mFinalSip').textContent = fmt(Math.round(finalSip)) + '/mo';
+
+    // Chart
+    if (chart) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = corpusArr;
+      chart.data.datasets[1].data = sipInvArr;
+      chart.data.datasets[2].data = lumpArr;
+      chart.update('none');
+    } else {
+      chart = new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Total corpus',    data: corpusArr, borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.08)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2, order: 1 },
+            { label: 'SIP invested',    data: sipInvArr, borderColor: '#378ADD', backgroundColor: 'rgba(55,138,221,0.1)',  fill: true, tension: 0.1, pointRadius: 0, borderWidth: 1.5, order: 2 },
+            { label: 'Lump sum growth', data: lumpArr,   borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.06)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5, borderDash: [5,4], order: 3 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1a1d1a',
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              titleColor: '#8a9188',
+              bodyColor: '#f0f2f0',
+              titleFont: { family: 'DM Mono', size: 11 },
+              bodyFont: { family: 'DM Sans', size: 13 },
+              callbacks: { label: ctx => '  ' + ctx.dataset.label + ': ' + fmt(ctx.parsed.y) }
+            }
+          },
+          scales: {
+            x: { ticks: { font: { family: 'DM Mono', size: 10 }, color: '#5a635a', autoSkip: true, maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+            y: { ticks: { font: { family: 'DM Mono', size: 10 }, color: '#5a635a', callback: v => fmtA(v) }, grid: { color: 'rgba(255,255,255,0.04)' } }
+          }
+        }
+      });
+    }
+
+    // Table — show every year up to 40 rows
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = tableRows.map(r => `
+      <tr>
+        <td>${r.year}</td>
+        <td>${fmt(Math.round(r.sip))}</td>
+        <td>${fmt(Math.round(r.invested))}</td>
+        <td>${fmt(Math.round(r.lumpVal))}</td>
+        <td>${fmt(Math.round(r.sipVal))}</td>
+        <td>${fmt(Math.round(r.corpus))}</td>
+      </tr>
+    `).join('');
+  }
+
+  ['sLump','sSip','sStep','sRate','sYears'].forEach(id =>
+    document.getElementById(id).addEventListener('input', update)
+  );
+  update();
+</script>
+</body>
+</html>
