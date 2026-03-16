@@ -1,137 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XIRR Calculator</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; line-height: 1.6; background-color: #f8f9fa; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        h1 { color: #28a745; /* Green for financials */ border-bottom: 3px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 25px; text-align: center; }
-        .cashflow-entry { display: flex; gap: 10px; margin-bottom: 10px; }
-        .cashflow-entry input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; }
-        .cashflow-entry button { background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-        .button-group { margin-top: 20px; display: flex; gap: 10px; }
-        .button-group button { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
-        .button-group button:hover { background-color: #0056b3; }
-        #results { margin-top: 30px; padding: 15px; border-left: 5px solid #28a745; background-color: #e6f7ed; color: #155724; border-radius: 4px; font-size: 1.1em; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XIRR Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f0e;
+      --bg2: #141714;
+      --bg3: #1a1d1a;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --green: #4ade80;
+      --amber: #fbbf24;
+      --red: #f87171;
+      --purple: #a78bfa;
+      --text: #f0f2f0;
+      --text2: #8a9188;
+      --text3: #5a635a;
+      --card-bg: #141714;
+      --track: #2a2e2a;
+      --thumb: #4ade80;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--green);
+      border: 1px solid rgba(74,222,128,0.25);
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease infinite;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.1;
+      font-weight: 400;
+      color: var(--text);
+    }
+    h1 em { font-style: italic; color: var(--green); }
+
+    .subtitle {
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: var(--text2);
+      font-weight: 300;
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      animation: fadeUp 0.6s ease both;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Cashflow rows */
+    .cf-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
+
+    .cf-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .cf-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    input[type="date"],
+    input[type="number"] {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input[type="date"]:focus,
+    input[type="number"]:focus {
+      border-color: rgba(74,222,128,0.4);
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+      cursor: pointer;
+    }
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .negative-val { color: var(--red) !important; }
+    .positive-val { color: var(--green) !important; }
+
+    .btn-remove {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--text3);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      flex-shrink: 0;
+      margin-top: 20px;
+    }
+    .btn-remove:hover { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.08); }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid var(--border2);
+    }
+    .btn-add {
+      background: transparent;
+      color: var(--text2);
+    }
+    .btn-add:hover { border-color: var(--green); color: var(--green); background: rgba(74,222,128,0.06); }
+
+    .btn-calc {
+      background: var(--green);
+      color: #0d0f0e;
+      border-color: var(--green);
+      flex: 1;
+    }
+    .btn-calc:hover { background: #22c55e; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
+
+    /* Result */
+    .result-card {
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      animation: fadeUp 0.4s ease both;
+    }
+    .result-xirr {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .result-xirr.positive { color: var(--green); }
+    .result-xirr.negative { color: var(--red); }
+    .result-sub {
+      font-size: 13px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+    }
+    .result-error {
+      font-size: 14px;
+      color: var(--amber);
+      font-family: 'DM Mono', monospace;
+      line-height: 1.6;
+    }
+    .result-placeholder {
+      font-size: 14px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Metrics row */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 1.25rem;
+    }
+    .metric {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.875rem 1rem;
+    }
+    .metric-label {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.08em;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    /* Helper note */
+    .note {
+      margin-top: 1rem;
+      padding: 0.875rem 1rem;
+      background: rgba(251,191,36,0.06);
+      border: 1px solid rgba(251,191,36,0.15);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.6;
+      font-family: 'DM Mono', monospace;
+    }
+
+    footer {
+      margin-top: 4rem;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    @media (max-width: 560px) {
+      .cf-row { grid-template-columns: 1fr 1fr auto; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
 </head>
 <body>
+<div class="page">
 
-    <div class="container">
-        <h1>XIRR Calculator 📈</h1>
+  <header>
+    <div class="badge">XIRR · Cash Flow Analysis</div>
+    <h1>What's your<br><em>real return?</em></h1>
+    <p class="subtitle">Calculate the Extended Internal Rate of Return (XIRR) for irregular cash flows — SIPs, lump sums, redemptions, or any mix.</p>
+  </header>
 
-        <p>Enter the dates (YYYY-MM-DD) and corresponding cash flows. The initial investment (time 0) should be a negative value.</p>
-        
-        <div id="cashflows">
-            <div class="cashflow-entry">
-                <input type="date" value="2023-01-01" id="date0">
-                <input type="number" step="0.01" value="-10000" id="flow0" placeholder="Cash Flow (e.g., -10000)">
-            </div>
-            <div class="cashflow-entry">
-                <input type="date" value="2023-12-31" id="date1">
-                <input type="number" step="0.01" value="12000" id="flow1" placeholder="Cash Flow (e.g., 12000)">
-            </div>
-        </div>
+  <div class="card">
+    <div class="card-title">Cash flows</div>
+    <p style="font-size:12px; color:var(--text3); margin-bottom:1rem; font-family:'DM Mono',monospace;">Investments are <span style="color:var(--red);">negative</span> · Redemptions are <span style="color:var(--green);">positive</span></p>
 
-        <div class="button-group">
-            <button onclick="addCashFlow()">➕ Add Row</button>
-            <button onclick="calculateXIRR()">🧮 Calculate XIRR</button>
-        </div>
-
-        <div id="results">
-            The calculated XIRR will appear here.
-        </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:10px; margin-bottom:6px; padding:0 2px;">
+      <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; color:var(--text3); text-transform:uppercase;">Date</span>
+      <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; color:var(--text3); text-transform:uppercase;">Amount (₹)</span>
+      <span style="width:32px;"></span>
     </div>
 
-    <script>
-        // --- Content from XIRR Calculator.txt (Assumed JS Logic) ---
-        // (The actual logic for XIRR is complex and requires a numerical method like Newton's, 
-        //  but a placeholder function is provided here. You should replace this with 
-        //  the actual code from your file if it was a JS library/function.)
+    <div class="cf-list" id="cfList"></div>
 
-        let cashFlowCount = 2;
+    <div class="btn-row">
+      <button class="btn btn-add" onclick="addRow()">+ Add row</button>
+      <button class="btn btn-calc" onclick="calculate()">Calculate XIRR →</button>
+    </div>
+  </div>
 
-        function addCashFlow() {
-            const container = document.getElementById('cashflows');
-            const newIndex = cashFlowCount++;
-            const newRow = document.createElement('div');
-            newRow.className = 'cashflow-entry';
-            newRow.innerHTML = `
-                <input type="date" id="date${newIndex}" value="${new Date().toISOString().slice(0, 10)}">
-                <input type="number" step="0.01" id="flow${newIndex}" placeholder="Cash Flow">
-            `;
-            container.appendChild(newRow);
-        }
+  <div id="resultArea"></div>
 
-        // The core XIRR function (a simplified, placeholder version)
-        function XIRR(flows, dates, guess = 0.1) {
-            // This is a complex calculation requiring iterative methods (like Newton's method)
-            // A simple placeholder is used here as the full implementation is lengthy.
-            
-            if (flows.length !== dates.length || flows.length < 2) {
-                return 'Error: Need at least two cash flows (investment & return).';
-            }
+  <div class="note">
+    ⚡ XIRR uses Newton's method to find the discount rate that makes NPV = 0. It handles irregular intervals unlike CAGR. Ensure at least one negative (investment) and one positive (redemption) cash flow.
+  </div>
 
-            // Simple check: XIRR requires at least one negative (investment) and one positive (return) flow.
-            const hasPositive = flows.some(f => f > 0);
-            const hasNegative = flows.some(f => f < 0);
-            if (!hasPositive || !hasNegative) {
-                return 'Error: Cash flows must include both an investment (negative) and a return (positive).';
-            }
-            
-            // Placeholder: Return a fixed value or a message
-            console.log("Calculating XIRR for:", flows, dates);
-            // Replace the line below with your actual XIRR calculation logic.
-            return 'Calculation Placeholder: 18.23%'; 
-        }
+  <footer>Built with ♥ · Hosted on GitHub Pages · All calculations are illustrative</footer>
 
-        function calculateXIRR() {
-            const flows = [];
-            const dates = [];
-            let allValid = true;
+</div>
+<script>
+  let rowCount = 0;
 
-            for (let i = 0; i < cashFlowCount; i++) {
-                const dateInput = document.getElementById(`date${i}`);
-                const flowInput = document.getElementById(`flow${i}`);
+  function addRow(date = '', amount = '') {
+    const list = document.getElementById('cfList');
+    const id = rowCount++;
+    const div = document.createElement('div');
+    div.className = 'cf-row';
+    div.id = 'row_' + id;
+    div.innerHTML = `
+      <input type="date" id="date_${id}" value="${date}" onchange="colorFlow(${id})">
+      <input type="number" id="flow_${id}" value="${amount}" placeholder="e.g. -10000" step="0.01" oninput="colorFlow(${id})">
+      <button class="btn-remove" onclick="removeRow(${id})" title="Remove">×</button>
+    `;
+    list.appendChild(div);
+    colorFlow(id);
+  }
 
-                if (dateInput && flowInput) {
-                    const dateVal = dateInput.value;
-                    const flowVal = parseFloat(flowInput.value);
+  function colorFlow(id) {
+    const input = document.getElementById('flow_' + id);
+    if (!input) return;
+    const v = parseFloat(input.value);
+    input.className = isNaN(v) ? '' : v < 0 ? 'negative-val' : 'positive-val';
+  }
 
-                    if (dateVal && !isNaN(flowVal)) {
-                        dates.push(new Date(dateVal));
-                        flows.push(flowVal);
-                    } else {
-                        allValid = false;
-                        break;
-                    }
-                }
-            }
+  function removeRow(id) {
+    const row = document.getElementById('row_' + id);
+    if (row) row.remove();
+  }
 
-            const resultsDiv = document.getElementById('results');
+  // Newton's method XIRR
+  function xirr(flows, dates, guess = 0.1) {
+    const MAX_ITER = 200;
+    const PRECISION = 1e-7;
+    const d0 = dates[0];
+    let rate = guess;
 
-            if (!allValid) {
-                resultsDiv.innerHTML = '<span style="color:red;">Please ensure all date and cash flow fields are filled correctly.</span>';
-                return;
-            }
+    for (let iter = 0; iter < MAX_ITER; iter++) {
+      let npv = 0, dnpv = 0;
+      for (let i = 0; i < flows.length; i++) {
+        const t = (dates[i] - d0) / (365.25 * 24 * 3600 * 1000);
+        const denom = Math.pow(1 + rate, t);
+        npv += flows[i] / denom;
+        dnpv -= t * flows[i] / (denom * (1 + rate));
+      }
+      if (Math.abs(dnpv) < 1e-12) break;
+      const newRate = rate - npv / dnpv;
+      if (Math.abs(newRate - rate) < PRECISION) return newRate;
+      rate = newRate;
+    }
+    return rate;
+  }
 
-            // Call the XIRR function
-            const xirrResult = XIRR(flows, dates);
+  function fmt(n) {
+    const abs = Math.abs(n);
+    if (abs >= 10000000) return '₹' + (n/10000000).toFixed(2) + ' Cr';
+    if (abs >= 100000)   return '₹' + (n/100000).toFixed(2) + ' L';
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
 
-            if (typeof xirrResult === 'string' && xirrResult.startsWith('Error')) {
-                resultsDiv.innerHTML = `<span style="color:red;">${xirrResult}</span>`;
-            } else if (typeof xirrResult === 'string' && xirrResult.includes('Placeholder')) {
-                resultsDiv.innerHTML = `<strong>XIRR:</strong> ${xirrResult} <br> <em>(Note: Replace the placeholder function in the script with your actual XIRR calculation logic for an accurate result.)</em>`;
-            }
-            else {
-                resultsDiv.innerHTML = `<strong>XIRR:</strong> ${xirrResult.toFixed(2)}%`;
-            }
-        }
+  function calculate() {
+    const flows = [], dates = [];
+    for (let i = 0; i < rowCount; i++) {
+      const dEl = document.getElementById('date_' + i);
+      const fEl = document.getElementById('flow_' + i);
+      if (!dEl || !fEl) continue;
+      const d = dEl.value, f = parseFloat(fEl.value);
+      if (d && !isNaN(f)) {
+        dates.push(new Date(d));
+        flows.push(f);
+      }
+    }
 
-        // --- End of Content from XIRR Calculator.txt ---
-    </script>
+    const area = document.getElementById('resultArea');
 
+    if (flows.length < 2) {
+      area.innerHTML = `<div class="result-card"><p class="result-error">⚠ Add at least two cash flows with dates.</p></div>`;
+      return;
+    }
+    const hasPos = flows.some(f => f > 0), hasNeg = flows.some(f => f < 0);
+    if (!hasPos || !hasNeg) {
+      area.innerHTML = `<div class="result-card"><p class="result-error">⚠ Cash flows must include both an investment (negative) and a redemption (positive).</p></div>`;
+      return;
+    }
+
+    let rate;
+    try {
+      rate = xirr(flows, dates);
+      if (!isFinite(rate) || isNaN(rate)) throw new Error('Did not converge');
+    } catch(e) {
+      area.innerHTML = `<div class="result-card"><p class="result-error">⚠ Could not converge on a solution. Check your cash flows — try different values or a different mix.</p></div>`;
+      return;
+    }
+
+    const pct = (rate * 100).toFixed(2);
+    const isPos = rate >= 0;
+
+    const totalInvested = flows.filter(f => f < 0).reduce((a, b) => a + Math.abs(b), 0);
+    const totalReceived = flows.filter(f => f > 0).reduce((a, b) => a + b, 0);
+    const netGain = totalReceived - totalInvested;
+
+    const d0 = dates[0], dN = dates[dates.length - 1];
+    const years = ((dN - d0) / (365.25 * 24 * 3600 * 1000)).toFixed(1);
+
+    area.innerHTML = `
+      <div class="result-card">
+        <div class="card-title">Result</div>
+        <div class="result-xirr ${isPos ? 'positive' : 'negative'}">${pct}%</div>
+        <div class="result-sub">annualised return (XIRR)</div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-label">Total invested</div>
+            <div class="metric-value">${fmt(totalInvested)}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Total received</div>
+            <div class="metric-value">${fmt(totalReceived)}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Net gain/loss</div>
+            <div class="metric-value" style="color:${netGain >= 0 ? 'var(--green)' : 'var(--red)'}">${netGain >= 0 ? '+' : ''}${fmt(netGain)}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Cash flows</div>
+            <div class="metric-value">${flows.length}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Period</div>
+            <div class="metric-value">${years} yrs</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Multiple</div>
+            <div class="metric-value" style="color:${totalReceived/totalInvested >= 1 ? 'var(--green)' : 'var(--red)'}">${(totalReceived/totalInvested).toFixed(2)}x</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Default rows
+  addRow(new Date().toISOString().slice(0,10).replace(/\d{4}/, y => parseInt(y)-1), '-100000');
+  addRow(new Date(Date.now() - 180*24*3600*1000).toISOString().slice(0,10), '-50000');
+  addRow(new Date().toISOString().slice(0,10), '175000');
+</script>
 </body>
 </html>

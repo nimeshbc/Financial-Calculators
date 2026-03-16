@@ -1,524 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SWP Calculator</title>
-    <!-- Chart.js for beautiful visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            padding: 20px; 
-            line-height: 1.6; 
-            background-color: #f0f4f8; 
-            color: #333;
-        }
-        .container { 
-            max-width: 900px; /* Increased max width for chart/table */
-            margin: 30px auto; 
-            padding: 30px; 
-            background-color: #ffffff; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); 
-        }
-        h1 { 
-            color: #007bff; 
-            text-align: center; 
-            margin-bottom: 30px; 
-            font-size: 1.8rem;
-            border-bottom: 2px solid #007bff33;
-            padding-bottom: 10px;
-        }
-        h2 {
-            color: #555;
-            margin-top: 40px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
-        }
-        .input-group { 
-            margin-bottom: 20px; 
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-        }
-        label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 600; 
-            color: #555;
-            font-size: 0.95rem;
-        }
-        input[type="number"] { 
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-        input[type="number"]:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        /* Style for the amount in words display */
-        .word-display {
-            display: block;
-            margin-top: 5px;
-            font-size: 0.85rem;
-            color: #007bff;
-            font-weight: 500;
-            text-transform: capitalize;
-        }
-        button { 
-            width: 100%;
-            padding: 12px;
-            background-color: #28a745; /* Success Green */
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
-            margin-top: 15px;
-        }
-        button:hover { 
-            background-color: #1e8734; 
-            transform: translateY(-1px);
-        }
-        #results { 
-            margin-top: 30px; 
-            padding: 20px; 
-            background-color: #d4edda; 
-            border: 1px solid #c3e6cb; 
-            color: #155724; 
-            border-radius: 8px; 
-            font-size: 1.2rem;
-            text-align: center;
-            font-weight: bold;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SWP Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Chart and Table Styling */
-        #chartContainer {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-        #breakdownTableContainer {
-            margin-top: 30px;
-            overflow-x: auto; /* Allows horizontal scrolling for table */
-            max-height: 500px; /* Added max height to allow scrolling for long tables */
-            overflow-y: auto;
-        }
-        .breakdown-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9em;
-        }
-        .breakdown-table th, .breakdown-table td {
-            padding: 10px 8px;
-            border: 1px solid #e0e0e0;
-            text-align: right;
-        }
-        .breakdown-table th {
-            background-color: #007bff;
-            color: white;
-            text-align: center;
-            position: sticky;
-            top: 0; /* Makes the header sticky when scrolling vertically */
-            z-index: 10;
-        }
-        .breakdown-table td:nth-child(1),
-        .breakdown-table td:nth-child(2) {
-            text-align: center !important; /* Center align Year and Month columns */
-        }
+    :root {
+      --bg: #0d0f0e;
+      --bg2: #141714;
+      --bg3: #1a1d1a;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --green: #4ade80;
+      --green-mid: #22c55e;
+      --amber: #fbbf24;
+      --red: #f87171;
+      --blue: #60a5fa;
+      --text: #f0f2f0;
+      --text2: #8a9188;
+      --text3: #5a635a;
+      --card-bg: #141714;
+      --track: #2a2e2a;
+      --thumb: #4ade80;
+    }
 
-        .table-title {
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #555;
-        }
-        /* Responsive adjustments for smaller screens */
-        @media (max-width: 650px) {
-            body { padding: 10px; }
-            .container { margin: 10px auto; padding: 20px; }
-        }
-    </style>
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--green);
+      border: 1px solid rgba(74,222,128,0.25);
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease infinite;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      line-height: 1.1;
+      font-weight: 400;
+    }
+    h1 em { font-style: italic; color: var(--green); }
+
+    .subtitle {
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: var(--text2);
+      font-weight: 300;
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    /* Metrics */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .metric {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .metric-value.green  { color: var(--green); }
+    .metric-value.red    { color: var(--red); }
+    .metric-value.amber  { color: var(--amber); }
+    .metric-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+    /* Card */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .card-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Sliders */
+    .slider-group { margin-bottom: 1.25rem; }
+    .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .slider-label { font-size: 13px; color: var(--text2); font-weight: 300; }
+    .slider-value { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--green); }
+    .slider-words { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); margin-top: 5px; min-height: 14px; }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--track);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--thumb);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 3px rgba(74,222,128,0.15);
+      transition: box-shadow 0.2s;
+    }
+    input[type=range]:hover::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(74,222,128,0.2); }
+    input[type=range]::-moz-range-thumb {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--thumb);
+      border: 2px solid var(--bg);
+    }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+    /* Chart */
+    .chart-wrap { position: relative; width: 100%; height: 280px; }
+    .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 1rem; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+    /* Table */
+    .table-card { margin-top: 1.5rem; animation: fadeUp 0.6s 0.3s ease both; }
+    .table-scroll { overflow-x: auto; max-height: 420px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead tr { border-bottom: 1px solid var(--border2); position: sticky; top: 0; background: var(--card-bg); z-index: 2; }
+    th { padding: 8px 12px; text-align: right; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; color: var(--text3); text-transform: uppercase; }
+    th:first-child, th:nth-child(2) { text-align: center; }
+    td { padding: 7px 12px; text-align: right; color: var(--text2); border-bottom: 1px solid var(--border); }
+    td:first-child, td:nth-child(2) { text-align: center; color: var(--text3); font-family: 'DM Mono', monospace; }
+    td:last-child { font-weight: 500; }
+    tbody tr:hover { background: var(--bg3); }
+
+    /* Depletion warning */
+    .warning-banner {
+      padding: 0.875rem 1rem;
+      background: rgba(248,113,113,0.08);
+      border: 1px solid rgba(248,113,113,0.2);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--red);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 1rem;
+    }
+
+    footer {
+      margin-top: 4rem;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    @media (max-width: 600px) {
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .metric-value { font-size: 1.1rem; }
+    }
+  </style>
 </head>
-<body onload="updateInitialValues()">
+<body onload="update()">
+<div class="page">
 
-    <div class="container">
-        <h1>Systematic Withdrawal Plan (SWP) Calculator 💰</h1>
+  <header>
+    <div class="badge">SWP · Systematic Withdrawal Plan</div>
+    <h1>How long will your<br><em>money last?</em></h1>
+    <p class="subtitle">Model your corpus drawdown with monthly withdrawals, annual return, and inflation-adjusted step-up.</p>
+  </header>
 
-        <div class="input-group">
-            <label for="initialAmount">Initial Investment Amount (INR)</label>
-            <input type="number" id="initialAmount" value="5000000" min="0" oninput="updateWordDisplay('initialAmount', 'initialAmountWords')">
-            <span id="initialAmountWords" class="word-display"></span>
-        </div>
+  <div class="metrics" id="metricsRow">
+    <div class="metric">
+      <div class="metric-label">Final corpus</div>
+      <div class="metric-value" id="mFinal">—</div>
+      <div class="metric-sub" id="mFinalSub">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total withdrawn</div>
+      <div class="metric-value" id="mWithdrawn">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Interest earned</div>
+      <div class="metric-value green" id="mInterest">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Final monthly SWP</div>
+      <div class="metric-value" id="mFinalSwp">—</div>
+    </div>
+  </div>
 
-        <div class="input-group">
-            <label for="monthlyWithdrawal">Starting Monthly Withdrawal (INR)</label>
-            <input type="number" id="monthlyWithdrawal" value="30000" min="0" oninput="updateWordDisplay('monthlyWithdrawal', 'monthlyWithdrawalWords')">
-            <span id="monthlyWithdrawalWords" class="word-display"></span>
-        </div>
-        
-        <div class="input-group">
-            <label for="years">Withdrawal Tenure (Years)</label>
-            <input type="number" id="years" value="15" min="1" step="1">
-        </div>
-        
-        <div class="input-group">
-            <label for="annualReturn">Expected Annual Return (%)</label>
-            <input type="number" id="annualReturn" value="10" min="0" step="0.1">
-        </div>
-        
-        <div class="input-group">
-            <label for="expenseIncrease">Annual Increase in Withdrawal (%) (Inflation)</label>
-            <input type="number" id="expenseIncrease" value="5" min="0" step="0.1">
-        </div>
+  <div id="warningArea"></div>
 
-        <button onclick="calculateSWP()">Calculate Final Corpus & Generate Analysis</button>
+  <div class="layout">
 
-        <div id="results">
-            Enter values and click Calculate.
-        </div>
-        
-        <!-- Chart Section -->
-        <h2 id="chartSectionTitle" style="display:none;">Corpus Balance Over Time</h2>
-        <div id="chartContainer" style="display:none;">
-            <canvas id="swpChart"></canvas>
-        </div>
-        
-        <!-- Table Section -->
-        <h2 id="tableSectionTitle" style="display:none;">Monthly Breakdown Table</h2>
-        <div id="breakdownTableContainer">
-            <!-- Table will be injected here -->
-        </div>
+    <!-- Controls -->
+    <div class="card" style="animation-delay:0.05s;">
+      <div class="card-title">Inputs</div>
 
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Initial investment</span>
+          <span class="slider-value" id="vInit">₹50,00,000</span>
+        </div>
+        <input type="range" id="sInit" min="100000" max="100000000" step="100000" value="5000000" oninput="update()">
+        <div class="slider-words" id="wInit"></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Starting monthly withdrawal</span>
+          <span class="slider-value" id="vWithdraw">₹30,000</span>
+        </div>
+        <input type="range" id="sWithdraw" min="1000" max="500000" step="1000" value="30000" oninput="update()">
+        <div class="slider-words" id="wWithdraw"></div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Expected annual return</span>
+          <span class="slider-value" id="vRate">10%</span>
+        </div>
+        <input type="range" id="sRate" min="1" max="25" step="0.5" value="10" oninput="update()">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Annual withdrawal step-up</span>
+          <span class="slider-value" id="vInflation">5%</span>
+        </div>
+        <input type="range" id="sInflation" min="0" max="20" step="0.5" value="5" oninput="update()">
+      </div>
+
+      <hr class="divider">
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-label">Withdrawal tenure</span>
+          <span class="slider-value" id="vYears">15 years</span>
+        </div>
+        <input type="range" id="sYears" min="1" max="40" step="1" value="15" oninput="update()">
+      </div>
     </div>
 
-    <script>
-        let swpChart; // Variable to hold the Chart.js instance
+    <!-- Chart & Table -->
+    <div>
+      <div class="card" style="animation-delay:0.15s;">
+        <div class="card-title">Corpus balance over time</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div>Corpus balance</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fbbf24; opacity:0.7;"></div>Cumulative withdrawn</div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="swpChart"></canvas>
+        </div>
+      </div>
 
-        // --- Utility Functions ---
+      <div class="card table-card">
+        <div class="card-title">Monthly breakdown</div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Month</th>
+                <th>Start corpus</th>
+                <th>Withdrawal</th>
+                <th>Interest</th>
+                <th>End corpus</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-        // Function to convert a number into Indian words (Lakhs, Crores)
-        function numberToIndianWords(n) {
-            if (n === 0) return 'Zero';
-            const num = Math.floor(n);
-            
-            const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
-            const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  </div>
 
-            function convertGroup(n, suffix) {
-                let s = '';
-                if (n >= 100) {
-                    s += ones[Math.floor(n / 100)] + ' hundred ';
-                    n %= 100;
-                }
-                if (n >= 20) {
-                    s += tens[Math.floor(n / 10)] + ' ';
-                    n %= 10;
-                }
-                if (n > 0) {
-                    s += ones[n] + ' ';
-                }
-                return s.trim() + (suffix ? ' ' + suffix : '');
-            }
+  <footer>Built with ♥ · Hosted on GitHub Pages · All calculations are illustrative</footer>
 
-            let words = '';
+</div>
+<script>
+  let chart;
 
-            // Crores (up to 99)
-            let crore = Math.floor(num / 10000000);
-            if (crore > 0) {
-                words += convertGroup(crore, 'crore') + ' ';
-            }
+  function fmt(n) {
+    const abs = Math.abs(n);
+    if (abs >= 10000000) return '₹' + (n/10000000).toFixed(2) + ' Cr';
+    if (abs >= 100000)   return '₹' + (n/100000).toFixed(2) + ' L';
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
+  function fmtA(n) {
+    if (n >= 10000000) return '₹' + (n/10000000).toFixed(1) + 'Cr';
+    if (n >= 100000)   return '₹' + (n/100000).toFixed(1) + 'L';
+    return '₹' + Math.round(n/1000) + 'K';
+  }
 
-            // Lakhs (up to 99)
-            let lakh = Math.floor((num % 10000000) / 100000);
-            if (lakh > 0) {
-                words += convertGroup(lakh, 'lakh') + ' ';
-            }
+  // Indian words
+  function toWords(n) {
+    n = Math.floor(n);
+    if (n === 0) return 'Zero';
+    const ones = ['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+    const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+    function grp(v, sfx) {
+      let s = '';
+      if (v >= 100) { s += ones[Math.floor(v/100)] + ' hundred '; v %= 100; }
+      if (v >= 20)  { s += tens[Math.floor(v/10)] + ' '; v %= 10; }
+      if (v > 0)    { s += ones[v] + ' '; }
+      return s.trim() + (sfx ? ' ' + sfx : '');
+    }
+    let w = '';
+    const cr = Math.floor(n/10000000); if (cr) w += grp(cr,'crore') + ' ';
+    const lk = Math.floor((n%10000000)/100000); if (lk) w += grp(lk,'lakh') + ' ';
+    const th = Math.floor((n%100000)/1000); if (th) w += grp(th,'thousand') + ' ';
+    const rm = n % 1000; if (rm) w += grp(rm,'') + ' ';
+    return w.trim() + ' Rupees Only';
+  }
 
-            // Thousands and Hundreds
-            let thousandGroup = num % 100000;
-            let thousand = Math.floor(thousandGroup / 1000);
-            let remainder = thousandGroup % 1000;
+  function update() {
+    const init     = parseFloat(document.getElementById('sInit').value);
+    const withdraw = parseFloat(document.getElementById('sWithdraw').value);
+    const rate     = parseFloat(document.getElementById('sRate').value);
+    const inf      = parseFloat(document.getElementById('sInflation').value);
+    const years    = parseInt(document.getElementById('sYears').value);
+    const mr       = Math.pow(1 + rate/100, 1/12) - 1;
 
-            if (thousand > 0) {
-                words += convertGroup(thousand, 'thousand') + ' ';
-            }
-            
-            if (remainder > 0) {
-                 if (thousand === 0 && Math.floor(num/100000) === 0) {
-                    // This conditional block is redundant based on the grouping but kept for structural safety.
-                 }
-                 words += convertGroup(remainder, '');
-            }
-            
-            let finalWords = words.replace(/\s+/g, ' ').trim();
-            return finalWords ? finalWords + ' Rupees Only' : '';
+    document.getElementById('vInit').textContent     = fmt(init);
+    document.getElementById('vWithdraw').textContent = fmt(withdraw);
+    document.getElementById('vRate').textContent     = rate + '%';
+    document.getElementById('vInflation').textContent= inf + '%';
+    document.getElementById('vYears').textContent    = years + (years===1?' year':' years');
+    document.getElementById('wInit').textContent     = toWords(init);
+    document.getElementById('wWithdraw').textContent = toWords(withdraw);
+
+    let corpus = init, curW = withdraw;
+    const monthlyData = [];
+    let depleted = false, totalWithdrawn = 0, totalInterest = 0;
+
+    for (let y = 1; y <= years; y++) {
+      for (let m = 1; m <= 12; m++) {
+        const start = corpus;
+        corpus -= curW;
+        totalWithdrawn += curW;
+        if (corpus <= 0) {
+          corpus = 0; depleted = true;
+          monthlyData.push({ y, m, start, w: curW, interest: 0, end: 0 });
+          break;
         }
+        const interest = corpus * mr;
+        corpus += interest;
+        totalInterest += interest;
+        monthlyData.push({ y, m, start, w: curW, interest, end: corpus });
+      }
+      if (depleted) break;
+      curW *= (1 + inf/100);
+    }
 
-        // Updates the word display below input fields
-        function updateWordDisplay(inputId, displayId) {
-            const input = document.getElementById(inputId);
-            const display = document.getElementById(displayId);
-            let value = parseFloat(input.value);
-            
-            if (isNaN(value) || value <= 0) {
-                display.textContent = '';
-            } else {
-                value = Math.floor(value); 
-                display.textContent = numberToIndianWords(value);
+    const finalCorpus = depleted ? 0 : corpus;
+    const finalSwp = withdraw * Math.pow(1 + inf/100, Math.max(0, years-1));
+
+    // Metrics
+    const mFinalEl = document.getElementById('mFinal');
+    mFinalEl.textContent = fmt(finalCorpus);
+    mFinalEl.className = 'metric-value ' + (depleted ? 'red' : finalCorpus > init ? 'green' : '');
+    document.getElementById('mFinalSub').textContent = depleted ? 'corpus depleted' : 'remaining';
+    document.getElementById('mWithdrawn').textContent = fmt(totalWithdrawn);
+    document.getElementById('mInterest').textContent  = fmt(Math.round(totalInterest));
+    document.getElementById('mFinalSwp').textContent  = fmt(Math.round(finalSwp)) + '/mo';
+
+    // Warning
+    const warn = document.getElementById('warningArea');
+    warn.innerHTML = depleted
+      ? `<div class="warning-banner">⚠ Corpus depleted at Month ${monthlyData.length} — consider reducing withdrawals, increasing tenure, or expecting higher returns.</div>`
+      : '';
+
+    // Chart data — yearly points
+    const chartLabels = ['Now'], corpusVals = [init], withdrawnVals = [0];
+    let cumW = 0;
+    for (let y = 1; y <= years; y++) {
+      const row = monthlyData.find(r => r.y === y && r.m === 12) || monthlyData[monthlyData.length-1];
+      if (row) {
+        chartLabels.push('Yr ' + y);
+        corpusVals.push(Math.round(row.end));
+        cumW += monthlyData.filter(r => r.y === y).reduce((a,r) => a + r.w, 0);
+        withdrawnVals.push(Math.round(cumW));
+      }
+    }
+
+    if (chart) {
+      chart.data.labels = chartLabels;
+      chart.data.datasets[0].data = corpusVals;
+      chart.data.datasets[1].data = withdrawnVals;
+      chart.update('none');
+    } else {
+      chart = new Chart(document.getElementById('swpChart'), {
+        type: 'line',
+        data: {
+          labels: chartLabels,
+          datasets: [
+            { label: 'Corpus balance', data: corpusVals, borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.1)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 },
+            { label: 'Cumulative withdrawn', data: withdrawnVals, borderColor: '#fbbf24', backgroundColor: 'rgba(251,191,36,0.07)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 1.5, borderDash: [5,4] }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1a1d1a',
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              titleColor: '#8a9188',
+              bodyColor: '#f0f2f0',
+              titleFont: { family: 'DM Mono', size: 11 },
+              bodyFont: { family: 'DM Sans', size: 13 },
+              callbacks: { label: ctx => '  ' + ctx.dataset.label + ': ' + fmt(ctx.parsed.y) }
             }
+          },
+          scales: {
+            x: { ticks: { font: { family: 'DM Mono', size: 10 }, color: '#5a635a', autoSkip: true, maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+            y: { ticks: { font: { family: 'DM Mono', size: 10 }, color: '#5a635a', callback: v => fmtA(v) }, grid: { color: 'rgba(255,255,255,0.04)' } }
+          }
         }
+      });
+    }
 
-        // Initializes the word display on page load
-        function updateInitialValues() {
-            updateWordDisplay('initialAmount', 'initialAmountWords');
-            updateWordDisplay('monthlyWithdrawal', 'monthlyWithdrawalWords');
-        }
-
-        // Formats number to Indian currency string
-        function formatINR(number) {
-            // Ensure numbers are rounded/formatted correctly before display
-            return Math.round(number).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-        }
-
-
-        // --- Core Calculation Function ---
-
-        function calculateSWP() {
-            // 1. Get Inputs and Validate
-            const initialAmount = parseFloat(document.getElementById('initialAmount').value);
-            const startingMonthlyWithdrawal = parseFloat(document.getElementById('monthlyWithdrawal').value);
-            const years = parseInt(document.getElementById('years').value);
-            const annualReturn = parseFloat(document.getElementById('annualReturn').value) / 100;
-            const expenseIncrease = parseFloat(document.getElementById('expenseIncrease').value) / 100;
-            
-            const resultsDiv = document.getElementById('results');
-
-            if (isNaN(initialAmount) || isNaN(startingMonthlyWithdrawal) || isNaN(years) || isNaN(annualReturn) || isNaN(expenseIncrease) || initialAmount < 0 || years < 1) {
-                resultsDiv.innerHTML = '⚠️ Please enter valid, non-negative numbers for all fields and tenure must be at least 1 year.';
-                return;
-            }
-
-            // Monthly compounding/discounting rates
-            const monthlyReturn = Math.pow(1 + annualReturn, 1/12) - 1;
-            
-            let currentCorpus = initialAmount;
-            let currentMonthlyWithdrawal = startingMonthlyWithdrawal;
-            const monthlyData = [];
-            
-            let fundDepleted = false;
-            let totalMonthCount = 0;
-
-            // Loop through each year
-            for (let y = 1; y <= years; y++) {
-                
-                // Monthly Iteration within the year
-                for (let m = 1; m <= 12; m++) {
-                    if (fundDepleted) break;
-                    
-                    totalMonthCount++; // Increment total month counter
-                    const startBalance = currentCorpus;
-
-                    // 1. Withdrawal happens at the start of the month
-                    const withdrawalAmount = currentMonthlyWithdrawal;
-                    currentCorpus -= withdrawalAmount;
-                    
-                    if (currentCorpus < 0) {
-                        // Fund depleted on this withdrawal
-                        fundDepleted = true;
-                        currentCorpus = 0; // Set to zero for final display
-                        break;
-                    }
-                    
-                    // 2. Remaining corpus grows for the month
-                    const interest = currentCorpus * monthlyReturn;
-                    currentCorpus += interest;
-                    const endBalance = currentCorpus;
-
-                    monthlyData.push({
-                        year: y, // Store year explicitly
-                        month: m, // Store month explicitly
-                        totalMonth: totalMonthCount, // Total month number for charting
-                        startCorpus: startBalance,
-                        withdrawal: withdrawalAmount,
-                        interestEarned: interest,
-                        endCorpus: endBalance
-                    });
-                }
-                
-                if (fundDepleted) break;
-
-                // Annual increase in withdrawal amount (Inflation adjustment)
-                currentMonthlyWithdrawal *= (1 + expenseIncrease);
-            }
-            
-            // 2. Output Final Result
-            const finalCorpus = currentCorpus;
-            let finalMessage = '';
-
-            if (fundDepleted) {
-                finalMessage = `
-                    <span style="color:red; font-size: 1.1rem;">
-                        Corpus depleted! The fund ran out. The last successful withdrawal was at the end of Month ${monthlyData.length}.
-                    </span>
-                `;
-            } else {
-                finalMessage = `
-                    <p>Final Corpus After ${years} Years:</p>
-                    <strong>INR ${formatINR(finalCorpus)}</strong>
-                `;
-            }
-
-            resultsDiv.innerHTML = finalMessage;
-            
-            // 3. Render Visualization and Table
-            document.getElementById('chartSectionTitle').style.display = 'block';
-            document.getElementById('tableSectionTitle').style.display = 'block';
-            document.getElementById('chartContainer').style.display = 'block';
-
-            renderChart(monthlyData);
-            renderBreakdownTable(monthlyData);
-        }
-
-        // --- Chart Rendering Function (Chart.js) ---
-        function renderChart(data) {
-            const ctx = document.getElementById('swpChart').getContext('2d');
-
-            // Destroy previous chart instance if it exists
-            if (swpChart) {
-                swpChart.destroy();
-            }
-
-            // Prepare labels: Use Month Number (1, 2, 3, ...) for primary plotting
-            const labels = data.map(item => item.totalMonth); 
-            const corpusValues = data.map(item => item.endCorpus);
-            
-            // Chart Configuration
-            swpChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Corpus Balance (INR)',
-                        data: corpusValues,
-                        borderColor: 'rgb(0, 123, 255)',
-                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                        borderWidth: 3,
-                        pointRadius: 1,
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Corpus Value (INR)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    // Display Y-axis ticks in Lakhs/Crores for better readability
-                                    if (value >= 10000000) return (value / 10000000).toFixed(1) + ' Cr';
-                                    if (value >= 100000) return (value / 100000).toFixed(1) + ' L';
-                                    return value;
-                                }
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Time in Years'
-                            },
-                            ticks: {
-                                // Only show a label every 12 months, and label it as the year number
-                                callback: function(value, index) {
-                                    const totalMonths = value + 1; // Since labels are 1-indexed (totalMonth), value is the month index starting from 0.
-                                    if (totalMonths % 12 === 0) {
-                                        return `Year ${totalMonths / 12}`;
-                                    }
-                                    return null; // Hide intermediate ticks
-                                }
-                            },
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += 'INR ' + formatINR(context.parsed.y);
-                                    }
-                                    return label;
-                                },
-                                title: function(context) {
-                                    // Use the explicit year and month stored in the data object for clear tooltips
-                                    const item = data[context[0].dataIndex];
-                                    return `Year ${item.year}, Month ${item.month} (Total Month ${item.totalMonth})`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-
-        // --- Table Rendering Function ---
-        function renderBreakdownTable(data) {
-            const tableContainer = document.getElementById('breakdownTableContainer');
-            if (data.length === 0) {
-                tableContainer.innerHTML = '<p class="table-title">No monthly data to display (Corpus was too small).</p>';
-                return;
-            }
-
-            let tableHTML = '<table class="breakdown-table">';
-            tableHTML += '<thead><tr><th>Year</th><th>Month</th><th>Start Corpus (INR)</th><th>Monthly Withdrawal (INR)</th><th>Interest Earned (INR)</th><th>End Corpus (INR)</th></tr></thead>';
-            tableHTML += '<tbody>';
-
-            const maxMonthsToShow = data.length; 
-            
-            for (let i = 0; i < maxMonthsToShow; i++) {
-                const item = data[i];
-                tableHTML += `
-                    <tr>
-                        <td>${item.year}</td>
-                        <td>${item.month}</td>
-                        <td>${formatINR(item.startCorpus)}</td>
-                        <td>${formatINR(item.withdrawal)}</td>
-                        <td style="color:${item.interestEarned > 0 ? '#1e8734' : 'black'};">${formatINR(item.interestEarned)}</td>
-                        <td style="font-weight: bold;">${formatINR(item.endCorpus)}</td>
-                    </tr>
-                `;
-            }
-
-            tableHTML += '</tbody></table>';
-            tableContainer.innerHTML = tableHTML;
-        }
-
-    </script>
-
+    // Table
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = monthlyData.map((r, i) => `
+      <tr style="${i%2===0?'':'background:var(--bg3)'}">
+        <td>${r.y}</td>
+        <td>${r.m}</td>
+        <td>${fmt(Math.round(r.start))}</td>
+        <td style="color:var(--amber)">${fmt(Math.round(r.w))}</td>
+        <td style="color:var(--green)">${fmt(Math.round(r.interest))}</td>
+        <td style="color:${r.end < r.start * 0.5 ? 'var(--red)' : 'var(--text)'}">${fmt(Math.round(r.end))}</td>
+      </tr>
+    `).join('');
+  }
+</script>
 </body>
 </html>
